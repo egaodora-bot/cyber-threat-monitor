@@ -23,17 +23,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.6;
+            opacity: 0.65;
             pointer-events: none;
         }
         .land {
-            fill: #0a1f35;
+            fill: #08162b;
             stroke: #00ffcc;
-            stroke-width: 0.8;
+            stroke-width: 0.6;
         }
         .country-label {
-            fill: #7090b0;
-            font-size: 11px;
+            fill: #6080a0;
+            font-size: 10px;
             font-family: monospace;
             letter-spacing: 1px;
         }
@@ -76,10 +76,10 @@
 <body>
 
 <div id="container">
-    <!-- 自然な世界地図のSVGパス -->
+    <!-- 正確な大陸のシルエットデータを持つ世界地図SVG -->
     <svg id="svg-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <!-- グリッド線 -->
-        <g stroke="#0c233f" stroke-width="0.5">
+        <!-- 背景グリッド線 -->
+        <g stroke="#091c33" stroke-width="0.5">
             <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
             <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
             <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="3" />
@@ -88,32 +88,32 @@
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
 
-        <!-- 各大陸・国々の輪郭 -->
+        <!-- 本格的な大陸パス -->
         <g class="land">
             <!-- 北米大陸 -->
-            <path d="M 120,90 C 140,75 180,60 220,65 C 260,70 280,90 270,120 C 260,150 230,170 240,200 C 245,215 220,240 200,230 C 170,215 150,180 135,160 C 120,140 110,110 120,90 Z" />
+            <path d="M158,82 L175,70 L205,75 L230,62 L260,78 L278,92 L265,115 L285,130 L275,150 L250,140 L235,165 L245,190 L225,205 L200,185 L180,200 L160,170 L140,175 L125,145 L135,120 L158,82 Z" />
             <!-- 南米大陸 -->
-            <path d="M 215,250 C 240,245 265,260 275,290 C 285,320 265,370 250,410 C 235,445 220,430 210,390 C 200,340 195,300 205,270 C 208,258 212,252 215,250 Z" />
+            <path d="M210,250 L240,245 L260,265 L275,300 L260,355 L240,410 L215,435 L200,410 L210,360 L195,320 L205,270 L210,250 Z" />
             <!-- ヨーロッパ -->
-            <path d="M 460,95 C 480,85 520,80 545,95 C 560,105 550,130 530,140 C 500,150 475,135 460,120 C 455,110 455,100 460,95 Z" />
+            <path d="M470,95 L495,85 L525,90 L540,110 L525,135 L500,140 L475,130 L465,110 L470,95 Z" />
             <!-- アフリカ大陸 -->
-            <path d="M 470,160 C 510,155 540,170 555,200 C 570,230 550,290 535,330 C 520,370 490,380 475,340 C 455,290 445,210 455,185 C 460,170 465,162 470,160 Z" />
-            <!-- アジア大陸・ロシア -->
-            <path d="M 550,60 C 650,40 780,45 880,75 C 930,90 920,150 880,180 C 830,215 720,230 650,210 C 590,195 565,150 555,120 C 550,95 545,75 550,60 Z" />
+            <path d="M475,155 L510,150 L535,170 L555,205 L545,260 L530,325 L505,370 L480,350 L465,290 L455,220 L465,180 L475,155 Z" />
+            <!-- ユーラシア・アジア・ロシア大陸 -->
+            <path d="M530,60 L620,40 L710,45 L800,55 L880,75 L925,100 L905,145 L850,165 L810,150 L770,175 L710,160 L650,185 L600,155 L565,170 L540,140 L555,110 L530,60 Z" />
             <!-- オーストラリア大陸 -->
-            <path d="M 800,330 C 850,320 890,340 895,380 C 900,420 860,440 815,435 C 785,430 780,390 785,360 C 790,340 795,332 800,330 Z" />
-            <!-- 日本列島（ターゲット・強調表示） -->
-            <path id="japan-map" d="M 855,135 C 865,130 872,145 868,165 C 862,185 850,190 845,175 C 842,160 848,140 855,135 Z" fill="#ff0055" stroke="#ffffff" stroke-width="1.2" />
+            <path d="M800,345 L845,335 L885,350 L890,390 L870,430 L825,435 L795,415 L785,375 L800,345 Z" />
+            <!-- 日本列島（ターゲット・強調） -->
+            <path id="japan-map" d="M852,142 C858,138 865,148 862,160 C858,172 850,178 845,170 C842,160 847,146 852,142 Z" fill="#ff0055" stroke="#ffffff" stroke-width="1" />
         </g>
 
-        <!-- ラベル配置 -->
-        <text x="835" y="120" class="country-label" fill="#ff0055" font-weight="bold">★ TOKYO (TARGET)</text>
-        <text x="160" y="80" class="country-label">NORTH AMERICA</text>
+        <!-- 地域・ターゲット名 -->
+        <text x="838" y="132" class="country-label" fill="#ff0055" font-weight="bold">★ TOKYO (TARGET)</text>
+        <text x="160" y="70" class="country-label">NORTH AMERICA</text>
         <text x="480" y="75" class="country-label">EUROPE</text>
-        <text x="680" y="60" class="country-label">EURASIA / ASIA</text>
-        <text x="460" y="410" class="country-label">AFRICA</text>
-        <text x="210" y="460" class="country-label">SOUTH AMERICA</text>
-        <text x="800" y="460" class="country-label">AUSTRALIA</text>
+        <text x="680" y="38" class="country-label">EURASIA / ASIA</text>
+        <text x="465" y="390" class="country-label">AFRICA</text>
+        <text x="200" y="455" class="country-label">SOUTH AMERICA</text>
+        <text x="795" y="455" class="country-label">AUSTRALIA</text>
     </svg>
 
     <canvas id="canvas"></canvas>
@@ -137,10 +137,10 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// 日本（東京）の座標位置
+// 日本（東京）の位置座標
 const targetJapan = { x: 0.85, y: 0.31, name: "Japan (Tokyo)" };
 
-// 世界各地の攻撃元
+// 世界各地の攻撃元座標
 const sources = [
     { x: 0.18, y: 0.28, name: "USA (West)" },
     { x: 0.25, y: 0.32, name: "USA (East)" },
@@ -192,7 +192,7 @@ function animate() {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // 攻撃パケットの描画
+    // パケットの軌道描画
     for (let i = activePackets.length - 1; i >= 0; i--) {
         const p = activePackets[i];
         p.progress += p.speed;
