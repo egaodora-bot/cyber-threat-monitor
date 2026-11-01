@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAPAN CYBER THREAT MONITOR - わかりやすい脅威可視化</title>
+    <title>JAPAN CYBER THREAT MONITOR</title>
     <style>
         body {
             margin: 0;
@@ -23,19 +23,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.6;
+            opacity: 0.65;
             pointer-events: none;
         }
         .land {
             fill: #091a2e;
             stroke: #0ea5e9;
             stroke-width: 0.8;
-        }
-        .country-label {
-            fill: #64748b;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
         }
         #canvas {
             position: absolute;
@@ -44,108 +38,109 @@
             display: block;
         }
 
-        /* メインダッシュボード */
+        /* ダッシュボード（左上） */
         .hud-main {
             position: absolute;
             top: 20px;
             left: 20px;
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid #0ea5e9;
-            padding: 20px;
+            padding: 18px;
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(14, 165, 233, 0.3);
             z-index: 10;
-            width: 360px;
+            width: 340px;
         }
         h1 {
             margin: 0 0 4px 0;
-            font-size: 16px;
+            font-size: 15px;
             color: #f8fafc;
         }
         .subtitle {
-            font-size: 12px;
+            font-size: 11px;
             color: #38bdf8;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .stats-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            align-items: center;
+            margin-bottom: 10px;
             background: rgba(2, 6, 23, 0.6);
             border: 1px solid #1e293b;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 6px;
         }
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #94a3b8;
         }
         .stat-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #f8fafc;
         }
         .log-box {
-            font-size: 12px;
+            font-size: 11px;
             color: #cbd5e1;
             background: rgba(2, 6, 23, 0.8);
             border: 1px solid #1e293b;
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
-            height: 60px;
+            height: 50px;
             overflow: hidden;
             line-height: 1.4;
         }
 
-        /* 専門用語を使わない「わかりやすい解説パネル」 */
+        /* 解説パネル（左下） */
         .legend-panel {
             position: absolute;
             bottom: 20px;
             left: 20px;
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid #0ea5e9;
-            padding: 18px;
+            padding: 16px;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
             z-index: 10;
-            width: 360px;
+            width: 340px;
         }
         .legend-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: #f8fafc;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 1px solid #1e293b;
-            padding-bottom: 6px;
+            padding-bottom: 4px;
         }
         .legend-item {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 10px;
-            font-size: 12px;
+            margin-bottom: 8px;
+            font-size: 11px;
             color: #cbd5e1;
         }
         .color-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 8px;
             margin-top: 2px;
             flex-shrink: 0;
         }
         .legend-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: #94a3b8;
-            margin-top: 2px;
+            margin-top: 1px;
         }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <!-- 地図SVG -->
+    <!-- 地図SVG（左側のパネルと重ならないよう全体を右側に配置調整） -->
     <svg id="svg-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <g stroke="#08203e" stroke-width="0.5">
+        <g stroke="#08203e" stroke-width="0.5" transform="translate(40, 0)">
             <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
             <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
             <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="3" />
@@ -154,17 +149,23 @@
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
 
-        <g class="land">
+        <!-- 各大陸（右側に平行移動してパネルとの重なりを完全に解消） -->
+        <g class="land" transform="translate(60, 0)">
+            <!-- 北米 -->
             <path d="M140,80 L180,65 L220,70 L250,55 L280,75 L295,95 L275,120 L295,135 L280,160 L255,145 L240,170 L250,195 L225,210 L200,190 L180,205 L155,175 L135,180 L120,150 L130,120 L140,80 Z" />
+            <!-- 南米 -->
             <path d="M220,250 L250,245 L270,265 L285,305 L270,360 L250,415 L220,440 L205,415 L215,365 L200,325 L210,275 L220,250 Z" />
+            <!-- ヨーロッパ -->
             <path d="M470,95 L500,85 L530,90 L545,110 L530,140 L500,145 L475,135 L465,110 L470,95 Z" />
+            <!-- アフリカ -->
             <path d="M475,155 L510,150 L535,175 L555,205 L545,265 L530,330 L505,375 L480,355 L465,295 L455,220 L465,180 L475,155 Z" />
+            <!-- アジア・ロシア -->
             <path d="M530,55 L630,35 L720,40 L820,50 L900,75 L940,105 L915,150 L855,170 L815,155 L775,180 L715,165 L655,190 L605,160 L570,175 L545,145 L560,115 L530,55 Z" />
+            <!-- オーストラリア -->
             <path d="M800,350 L850,340 L890,355 L895,395 L875,435 L830,440 L800,420 L785,380 L800,350 Z" />
+            <!-- 日本（東京・ターゲット） -->
             <path id="japan-map" d="M855,140 C862,135 870,145 867,158 C863,170 855,176 850,168 C847,158 852,143 855,140 Z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5" />
         </g>
-
-        <text x="838" y="130" class="country-label" fill="#ef4444">★ 日本 (東京) を守る監視中</text>
     </svg>
 
     <canvas id="canvas"></canvas>
@@ -179,35 +180,35 @@
             <div id="count-total" class="stat-value">0</div>
         </div>
 
-        <div class="stat-label" style="margin-bottom: 4px;">いま起きている攻撃:</div>
+        <div class="stat-label" style="margin-bottom: 3px;">いま起きている攻撃:</div>
         <div id="log" class="log-box">システム起動中... ネットワークを監視しています。</div>
     </div>
 
-    <!-- わかりやすい凡例（初心者向け解説） -->
+    <!-- 初心者向け解説パネル -->
     <div class="legend-panel">
-        <div class="legend-title">📖 攻撃の種類の見方（初心者向け解説）</div>
+        <div class="legend-title">📖 攻撃の種類の見方</div>
         
         <div class="legend-item">
-            <div class="color-dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></div>
+            <div class="color-dot" style="background: #38bdf8; box-shadow: 0 0 6px #38bdf8;"></div>
             <div>
                 <b>🔵 青い光：不正アクセスの下見（スキャン）</b>
-                <div class="legend-desc">サーバーの鍵が空いていないか、隙を探してパトロールしている状態です。</div>
+                <div class="legend-desc">サーバーの隙を探してパトロールしている状態</div>
             </div>
         </div>
 
         <div class="legend-item">
-            <div class="color-dot" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+            <div class="color-dot" style="background: #ef4444; box-shadow: 0 0 6px #ef4444;"></div>
             <div>
                 <b>🔴 赤い光：サーバーをパンクさせる攻撃（高負荷）</b>
-                <div class="legend-desc">大量のデータを送りつけて、Webサイトをダウンさせようとする危険な攻撃です。</div>
+                <div class="legend-desc">大量データを送りつけてダウンさせようとする危険な攻撃</div>
             </div>
         </div>
 
         <div class="legend-item">
-            <div class="color-dot" style="background: #ffffff; box-shadow: 0 0 8px #ffffff;"></div>
+            <div class="color-dot" style="background: #ffffff; box-shadow: 0 0 6px #ffffff;"></div>
             <div>
                 <b>⚪ 白い光：生存確認（呼びかけ）</b>
-                <div class="legend-desc">「そこにパソコンはあるか？」と返事を探るための確認信号です。</div>
+                <div class="legend-desc">「そこにパソコンはあるか？」と返事を探る信号</div>
             </div>
         </div>
     </div>
@@ -226,16 +227,17 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const targetJapan = { x: 0.85, y: 0.31 };
+// 日本（東京）の位置座標（地図の移動に合わせて微調整）
+const targetJapan = { x: 0.90, y: 0.31 };
 
 const sources = [
-    { x: 0.18, y: 0.28, name: "アメリカ（北米）" },
-    { x: 0.25, y: 0.32, name: "アメリカ（東海岸）" },
-    { x: 0.49, y: 0.22, name: "ヨーロッパ" },
-    { x: 0.52, y: 0.48, name: "アフリカ方面" },
-    { x: 0.72, y: 0.20, name: "アジア大陸方面" },
-    { x: 0.82, y: 0.75, name: "オーストラリア" },
-    { x: 0.23, y: 0.65, name: "南米" }
+    { x: 0.22, y: 0.28, name: "アメリカ（北米）" },
+    { x: 0.29, y: 0.32, name: "アメリカ（東海岸）" },
+    { x: 0.53, y: 0.22, name: "ヨーロッパ" },
+    { x: 0.56, y: 0.48, name: "アフリカ方面" },
+    { x: 0.76, y: 0.20, name: "アジア大陸方面" },
+    { x: 0.86, y: 0.75, name: "オーストラリア" },
+    { x: 0.27, y: 0.65, name: "南米" }
 ];
 
 const attackTypes = [
