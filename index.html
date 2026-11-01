@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            background-color: #050b14;
+            background-color: #030712;
             color: #00ffcc;
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
@@ -17,25 +17,25 @@
             width: 100vw;
             height: 100vh;
         }
-        /* 世界地図SVGのスタイル */
         #svg-map {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.5;
+            opacity: 0.6;
             pointer-events: none;
         }
         .land {
-            fill: #0a192f;
+            fill: #0a1f35;
             stroke: #00ffcc;
             stroke-width: 0.8;
         }
         .country-label {
-            fill: #88aacc;
-            font-size: 10px;
+            fill: #7090b0;
+            font-size: 11px;
             font-family: monospace;
+            letter-spacing: 1px;
         }
         #canvas {
             position: absolute;
@@ -47,17 +47,16 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(5, 15, 30, 0.9);
+            background: rgba(3, 11, 24, 0.9);
             border: 1px solid #00ffcc;
             padding: 15px;
             border-radius: 4px;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.25);
             z-index: 10;
         }
         h1 {
             margin: 0 0 5px 0;
             font-size: 16px;
-            letter-spacing: 1px;
             color: #fff;
             text-shadow: 0 0 8px #00ffcc;
         }
@@ -77,41 +76,44 @@
 <body>
 
 <div id="container">
-    <!-- 視認性を高めた世界地図SVG -->
+    <!-- 自然な世界地図のSVGパス -->
     <svg id="svg-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <!-- グリッド線（レーダー風） -->
-        <g stroke="#0e2a47" stroke-width="0.5">
-            <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="4" />
-            <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="4" />
-            <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="4" />
-            <line x1="250" y1="0" x2="250" y2="500" stroke-dasharray="4" />
-            <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="4" />
-            <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="4" />
+        <!-- グリッド線 -->
+        <g stroke="#0c233f" stroke-width="0.5">
+            <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
+            <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
+            <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="3" />
+            <line x1="250" y1="0" x2="250" y2="500" stroke-dasharray="3" />
+            <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="3" />
+            <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
 
-        <!-- 各大陸のシルエット -->
+        <!-- 各大陸・国々の輪郭 -->
         <g class="land">
-            <!-- 北米 -->
-            <path d="M 120,80 Q 180,60 230,90 Q 270,140 220,180 Q 150,200 130,150 Z" />
-            <!-- 南米 -->
-            <path d="M 220,220 Q 280,240 260,350 Q 230,420 200,380 Q 190,300 210,240 Z" />
-            <!-- 欧州 -->
-            <path d="M 450,90 Q 520,70 550,110 Q 510,150 460,140 Z" />
-            <!-- アフリカ -->
-            <path d="M 470,160 Q 560,170 540,280 Q 500,380 460,320 Q 430,240 460,170 Z" />
-            <!-- アジア・ロシア -->
-            <path d="M 560,50 Q 750,30 900,70 Q 920,160 820,200 Q 700,220 580,160 Z" />
-            <!-- オーストラリア -->
-            <path d="M 800,340 Q 890,330 870,420 Q 790,430 790,360 Z" />
-            <!-- 日本列島（ターゲット） -->
-            <path id="japan-map" d="M 830,140 Q 845,130 855,165 Q 840,180 830,140 Z" fill="#ff0055" stroke="#fff" stroke-width="1" />
+            <!-- 北米大陸 -->
+            <path d="M 120,90 C 140,75 180,60 220,65 C 260,70 280,90 270,120 C 260,150 230,170 240,200 C 245,215 220,240 200,230 C 170,215 150,180 135,160 C 120,140 110,110 120,90 Z" />
+            <!-- 南米大陸 -->
+            <path d="M 215,250 C 240,245 265,260 275,290 C 285,320 265,370 250,410 C 235,445 220,430 210,390 C 200,340 195,300 205,270 C 208,258 212,252 215,250 Z" />
+            <!-- ヨーロッパ -->
+            <path d="M 460,95 C 480,85 520,80 545,95 C 560,105 550,130 530,140 C 500,150 475,135 460,120 C 455,110 455,100 460,95 Z" />
+            <!-- アフリカ大陸 -->
+            <path d="M 470,160 C 510,155 540,170 555,200 C 570,230 550,290 535,330 C 520,370 490,380 475,340 C 455,290 445,210 455,185 C 460,170 465,162 470,160 Z" />
+            <!-- アジア大陸・ロシア -->
+            <path d="M 550,60 C 650,40 780,45 880,75 C 930,90 920,150 880,180 C 830,215 720,230 650,210 C 590,195 565,150 555,120 C 550,95 545,75 550,60 Z" />
+            <!-- オーストラリア大陸 -->
+            <path d="M 800,330 C 850,320 890,340 895,380 C 900,420 860,440 815,435 C 785,430 780,390 785,360 C 790,340 795,332 800,330 Z" />
+            <!-- 日本列島（ターゲット・強調表示） -->
+            <path id="japan-map" d="M 855,135 C 865,130 872,145 868,165 C 862,185 850,190 845,175 C 842,160 848,140 855,135 Z" fill="#ff0055" stroke="#ffffff" stroke-width="1.2" />
         </g>
 
-        <!-- 主要拠点ラベル -->
-        <text x="830" y="130" class="country-label" fill="#ff0055" font-weight="bold">★ TOKYO (TARGET)</text>
-        <text x="200" y="100" class="country-label">NORTH AMERICA</text>
-        <text x="500" y="80" class="country-label">EUROPE</text>
-        <text x="750" y="100" class="country-label">ASIA</text>
+        <!-- ラベル配置 -->
+        <text x="835" y="120" class="country-label" fill="#ff0055" font-weight="bold">★ TOKYO (TARGET)</text>
+        <text x="160" y="80" class="country-label">NORTH AMERICA</text>
+        <text x="480" y="75" class="country-label">EUROPE</text>
+        <text x="680" y="60" class="country-label">EURASIA / ASIA</text>
+        <text x="460" y="410" class="country-label">AFRICA</text>
+        <text x="210" y="460" class="country-label">SOUTH AMERICA</text>
+        <text x="800" y="460" class="country-label">AUSTRALIA</text>
     </svg>
 
     <canvas id="canvas"></canvas>
@@ -135,21 +137,21 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// 日本（東京）の画面上の位置比率
-const targetJapan = { x: 0.84, y: 0.32, name: "Japan (Tokyo)" };
+// 日本（東京）の座標位置
+const targetJapan = { x: 0.85, y: 0.31, name: "Japan (Tokyo)" };
 
-// 世界各地の攻撃発生元
+// 世界各地の攻撃元
 const sources = [
     { x: 0.18, y: 0.28, name: "USA (West)" },
-    { x: 0.24, y: 0.32, name: "USA (East)" },
+    { x: 0.25, y: 0.32, name: "USA (East)" },
     { x: 0.49, y: 0.22, name: "Europe (EU)" },
-    { x: 0.52, y: 0.45, name: "Africa" },
-    { x: 0.72, y: 0.25, name: "China / Asia" },
-    { x: 0.80, y: 0.72, name: "Australia" },
+    { x: 0.52, y: 0.48, name: "Africa" },
+    { x: 0.72, y: 0.20, name: "China / Asia" },
+    { x: 0.82, y: 0.75, name: "Australia" },
     { x: 0.23, y: 0.65, name: "South America" }
 ];
 
-// NICTER準拠のプロトコル（色分け）
+// NICTER準拠のプロトコル色分け
 const protocols = [
     { name: "TCP (Port Scan / Brute Force)", color: "#00ccff" }, // 青
     { name: "UDP (DDoS / Amplification)", color: "#ff3333" },    // 赤
@@ -180,13 +182,13 @@ function spawnPacket() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // ターゲット（日本・東京）のレーダー円パルス
+    // 東京（ターゲット）のレーダー円パルス
     const tx = targetJapan.x * canvas.width;
     const ty = targetJapan.y * canvas.height;
     
     ctx.beginPath();
-    ctx.arc(tx, ty, 12 + (Date.now() / 20) % 20, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
+    ctx.arc(tx, ty, 10 + (Date.now() / 25) % 25, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 0, 85, 0.45)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
@@ -195,12 +197,10 @@ function animate() {
         const p = activePackets[i];
         p.progress += p.speed;
 
-        // 弧を描く軌道計算
         const curX = p.sx + (p.tx - p.sx) * p.progress;
-        const arcHeight = Math.sin(p.progress * Math.PI) * -100;
+        const arcHeight = Math.sin(p.progress * Math.PI) * -110;
         const curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
 
-        // 軌跡の光る点
         ctx.beginPath();
         ctx.arc(curX, curY, 4, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
