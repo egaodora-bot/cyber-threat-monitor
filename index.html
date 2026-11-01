@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Threat Monitor - Japan Target</title>
+    <title>Japan Cyber Threat Monitor (NICTER Style)</title>
     <style>
         body {
             margin: 0;
-            background-color: #030712;
-            color: #00ffcc;
+            background-color: #020617;
+            color: #38bdf8;
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
         }
@@ -17,24 +17,25 @@
             width: 100vw;
             height: 100vh;
         }
+        /* 世界地図レイヤー */
         #svg-map {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.65;
+            opacity: 0.7;
             pointer-events: none;
         }
         .land {
-            fill: #08162b;
-            stroke: #00ffcc;
-            stroke-width: 0.6;
+            fill: #091a2e;
+            stroke: #0ea5e9;
+            stroke-width: 0.8;
         }
         .country-label {
-            fill: #6080a0;
-            font-size: 10px;
-            font-family: monospace;
+            fill: #94a3b8;
+            font-size: 11px;
+            font-weight: bold;
             letter-spacing: 1px;
         }
         #canvas {
@@ -43,43 +44,107 @@
             left: 0;
             display: block;
         }
-        .hud {
+        /* メインタイトル・ログパネル */
+        .hud-main {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(3, 11, 24, 0.9);
-            border: 1px solid #00ffcc;
-            padding: 15px;
-            border-radius: 4px;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.25);
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid #0ea5e9;
+            padding: 18px;
+            border-radius: 6px;
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.3);
             z-index: 10;
+            width: 340px;
         }
         h1 {
             margin: 0 0 5px 0;
-            font-size: 16px;
-            color: #fff;
-            text-shadow: 0 0 8px #00ffcc;
+            font-size: 15px;
+            color: #f8fafc;
+            letter-spacing: 1px;
         }
         .subtitle {
             font-size: 11px;
-            color: #00ffcc;
-            margin-bottom: 10px;
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat-box {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid #1e293b;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f8fafc;
         }
         .log-box {
-            font-size: 12px;
-            color: #a0f0ff;
-            max-width: 350px;
+            font-size: 11px;
+            color: #cbd5e1;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid #1e293b;
+            padding: 8px;
+            border-radius: 4px;
+            height: 50px;
+            overflow: hidden;
             word-break: break-all;
+        }
+
+        /* 凡例（プロトコルの意味を解説するパネル） */
+        .legend-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+            z-index: 10;
+            width: 340px;
+        }
+        .legend-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #f8fafc;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 11px;
+            color: #cbd5e1;
+        }
+        .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <!-- 正確な大陸のシルエットデータを持つ世界地図SVG -->
+    <!-- 理解しやすい地理配置の世界地図SVG -->
     <svg id="svg-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <!-- 背景グリッド線 -->
-        <g stroke="#091c33" stroke-width="0.5">
+        <!-- グリッド線 -->
+        <g stroke="#08203e" stroke-width="0.5">
             <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
             <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
             <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="3" />
@@ -88,40 +153,71 @@
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
 
-        <!-- 本格的な大陸パス -->
+        <!-- 各大陸のパス -->
         <g class="land">
-            <!-- 北米大陸 -->
-            <path d="M158,82 L175,70 L205,75 L230,62 L260,78 L278,92 L265,115 L285,130 L275,150 L250,140 L235,165 L245,190 L225,205 L200,185 L180,200 L160,170 L140,175 L125,145 L135,120 L158,82 Z" />
-            <!-- 南米大陸 -->
-            <path d="M210,250 L240,245 L260,265 L275,300 L260,355 L240,410 L215,435 L200,410 L210,360 L195,320 L205,270 L210,250 Z" />
+            <!-- 北米 -->
+            <path d="M140,80 L180,65 L220,70 L250,55 L280,75 L295,95 L275,120 L295,135 L280,160 L255,145 L240,170 L250,195 L225,210 L200,190 L180,205 L155,175 L135,180 L120,150 L130,120 L140,80 Z" />
+            <!-- 南米 -->
+            <path d="M220,250 L250,245 L270,265 L285,305 L270,360 L250,415 L220,440 L205,415 L215,365 L200,325 L210,275 L220,250 Z" />
             <!-- ヨーロッパ -->
-            <path d="M470,95 L495,85 L525,90 L540,110 L525,135 L500,140 L475,130 L465,110 L470,95 Z" />
-            <!-- アフリカ大陸 -->
-            <path d="M475,155 L510,150 L535,170 L555,205 L545,260 L530,325 L505,370 L480,350 L465,290 L455,220 L465,180 L475,155 Z" />
-            <!-- ユーラシア・アジア・ロシア大陸 -->
-            <path d="M530,60 L620,40 L710,45 L800,55 L880,75 L925,100 L905,145 L850,165 L810,150 L770,175 L710,160 L650,185 L600,155 L565,170 L540,140 L555,110 L530,60 Z" />
-            <!-- オーストラリア大陸 -->
-            <path d="M800,345 L845,335 L885,350 L890,390 L870,430 L825,435 L795,415 L785,375 L800,345 Z" />
-            <!-- 日本列島（ターゲット・強調） -->
-            <path id="japan-map" d="M852,142 C858,138 865,148 862,160 C858,172 850,178 845,170 C842,160 847,146 852,142 Z" fill="#ff0055" stroke="#ffffff" stroke-width="1" />
+            <path d="M470,95 L500,85 L530,90 L545,110 L530,140 L500,145 L475,135 L465,110 L470,95 Z" />
+            <!-- アフリカ -->
+            <path d="M475,155 L510,150 L535,170 L555,205 L545,265 L530,330 L505,375 L480,355 L465,295 L455,220 L465,180 L475,155 Z" />
+            <!-- アジア・ロシア -->
+            <path d="M530,55 L630,35 L720,40 L820,50 L900,75 L940,105 L915,150 L855,170 L815,155 L775,180 L715,165 L655,190 L605,160 L570,175 L545,145 L560,115 L530,55 Z" />
+            <!-- オーストラリア -->
+            <path d="M800,350 L850,340 L890,355 L895,395 L875,435 L830,440 L800,420 L785,380 L800,350 Z" />
+            <!-- 日本（ターゲット） -->
+            <path id="japan-map" d="M855,140 C862,135 870,145 867,158 C863,170 855,176 850,168 C847,158 852,143 855,140 Z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5" />
         </g>
 
-        <!-- 地域・ターゲット名 -->
-        <text x="838" y="132" class="country-label" fill="#ff0055" font-weight="bold">★ TOKYO (TARGET)</text>
-        <text x="160" y="70" class="country-label">NORTH AMERICA</text>
+        <!-- 地理・ターゲットラベル -->
+        <text x="838" y="130" class="country-label" fill="#ef4444">★ JAPAN (TOKYO)</text>
+        <text x="160" y="65" class="country-label">NORTH AMERICA</text>
         <text x="480" y="75" class="country-label">EUROPE</text>
-        <text x="680" y="38" class="country-label">EURASIA / ASIA</text>
-        <text x="465" y="390" class="country-label">AFRICA</text>
-        <text x="200" y="455" class="country-label">SOUTH AMERICA</text>
-        <text x="795" y="455" class="country-label">AUSTRALIA</text>
+        <text x="685" y="30" class="country-label">EURASIA / ASIA</text>
+        <text x="465" y="395" class="country-label">AFRICA</text>
+        <text x="200" y="460" class="country-label">SOUTH AMERICA</text>
+        <text x="795" y="460" class="country-label">AUSTRALIA</text>
     </svg>
 
     <canvas id="canvas"></canvas>
 
-    <div class="hud">
-        <h1>JAPAN CYBER THREAT MONITOR</h1>
-        <div class="subtitle">NICTER-Style Real-Time Packet Visualizer</div>
-        <div id="log" class="log-box">システム初期化完了。攻撃パケット監視中...</div>
+    <!-- 上部：統計＆リアルタイムログ -->
+    <div class="hud-main">
+        <h1>JAPAN THREAT MONITOR</h1>
+        <div class="subtitle">NICTER準拠 リアルタイムサイバー攻撃可視化</div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">総検知パケット</div>
+                <div id="count-total" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">主要ターゲット</div>
+                <div class="stat-value" style="color: #ef4444; font-size: 13px; padding-top: 2px;">Tokyo / Japan</div>
+            </div>
+        </div>
+
+        <div class="stat-label" style="margin-bottom: 4px;">直近の攻撃アクティビティ:</div>
+        <div id="log" class="log-box">システム初期化完了。監視ネットワーク稼働中...</div>
+    </div>
+
+    <!-- 下部：プロトコル（色）の解説パネル -->
+    <div class="legend-panel">
+        <div class="legend-title">📊 攻撃パケット種別の見方 (NICTER準拠)</div>
+        <div class="legend-item">
+            <div class="color-dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></div>
+            <span><b>青 (TCP):</b> ポートスキャン・不正侵入の試行</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-dot" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+            <span><b>赤 (UDP):</b> DDoS攻撃・サービス妨害の大量送信</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-dot" style="background: #ffffff; box-shadow: 0 0 8px #ffffff;"></div>
+            <span><b>白 (ICMP):</b> ネットワーク生存確認（Pingプローブ）</span>
+        </div>
     </div>
 </div>
 
@@ -129,6 +225,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const logEl = document.getElementById('log');
+const countTotalEl = document.getElementById('count-total');
 
 function resize() {
     canvas.width = window.innerWidth;
@@ -137,28 +234,29 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// 日本（東京）の位置座標
-const targetJapan = { x: 0.85, y: 0.31, name: "Japan (Tokyo)" };
+// 日本（東京）の固定位置座標
+const targetJapan = { x: 0.85, y: 0.31 };
 
-// 世界各地の攻撃元座標
+// 世界各地の攻撃元
 const sources = [
-    { x: 0.18, y: 0.28, name: "USA (West)" },
-    { x: 0.25, y: 0.32, name: "USA (East)" },
+    { x: 0.18, y: 0.28, name: "North America (USA)" },
+    { x: 0.25, y: 0.32, name: "North America (East)" },
     { x: 0.49, y: 0.22, name: "Europe (EU)" },
     { x: 0.52, y: 0.48, name: "Africa" },
-    { x: 0.72, y: 0.20, name: "China / Asia" },
+    { x: 0.72, y: 0.20, name: "Asia / China" },
     { x: 0.82, y: 0.75, name: "Australia" },
     { x: 0.23, y: 0.65, name: "South America" }
 ];
 
-// NICTER準拠のプロトコル色分け
+// プロトコル定義
 const protocols = [
-    { name: "TCP (Port Scan / Brute Force)", color: "#00ccff" }, // 青
-    { name: "UDP (DDoS / Amplification)", color: "#ff3333" },    // 赤
-    { name: "ICMP (Ping Probe)", color: "#ffffff" }               // 白
+    { name: "TCP (Port Scan)", color: "#38bdf8" }, // 青
+    { name: "UDP (DDoS Attack)", color: "#ef4444" }, // 赤
+    { name: "ICMP (Ping Probe)", color: "#ffffff" }  // 白
 ];
 
 let activePackets = [];
+let totalPacketsCount = 0;
 
 function spawnPacket() {
     const src = sources[Math.floor(Math.random() * sources.length)];
@@ -170,41 +268,45 @@ function spawnPacket() {
         tx: targetJapan.x * canvas.width,
         ty: targetJapan.y * canvas.height,
         progress: 0,
-        speed: 0.007 + Math.random() * 0.01,
+        speed: 0.006 + Math.random() * 0.008,
         color: proto.color,
         protoName: proto.name,
         sourceName: src.name
     });
 
-    logEl.innerHTML = `<span style="color:${proto.color}">[${proto.protoName.split(' ')[0]}]</span> Attack from <b style="color:#fff">${src.name}</b>`;
+    totalPacketsCount++;
+    countTotalEl.innerText = totalPacketsCount.toLocaleString();
+
+    logEl.innerHTML = `<span style="color:${proto.color}">[${proto.protoName}]</span><br>来自: <b>${src.name}</b> ⇒ 🇯🇵 Tokyo`;
+    logEl.scrollTop = logEl.scrollHeight;
 }
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 東京（ターゲット）のレーダー円パルス
+    // ターゲット（東京）のレーダー波紋エフェクト
     const tx = targetJapan.x * canvas.width;
     const ty = targetJapan.y * canvas.height;
     
     ctx.beginPath();
-    ctx.arc(tx, ty, 10 + (Date.now() / 25) % 25, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 0, 85, 0.45)';
+    ctx.arc(tx, ty, 12 + (Date.now() / 25) % 30, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // パケットの軌道描画
+    // 攻撃パケットの軌跡描画
     for (let i = activePackets.length - 1; i >= 0; i--) {
         const p = activePackets[i];
         p.progress += p.speed;
 
         const curX = p.sx + (p.tx - p.sx) * p.progress;
-        const arcHeight = Math.sin(p.progress * Math.PI) * -110;
+        const arcHeight = Math.sin(p.progress * Math.PI) * -100;
         const curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
 
         ctx.beginPath();
         ctx.arc(curX, curY, 4, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = p.color;
         ctx.fill();
 
@@ -217,7 +319,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-setInterval(spawnPacket, 400);
+setInterval(spawnPacket, 450);
 animate();
 </script>
 </body>
