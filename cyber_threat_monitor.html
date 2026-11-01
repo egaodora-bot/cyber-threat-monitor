@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Threat Monitor - Japan Target Visualization</title>
+    <!-- Tailwind CSS for UI layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #030712;
+            color: #38bdf8;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            user-select: none;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .font-sans-custom {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom Glowing and Cyberpunk UI Styles */
+        .cyber-border {
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1), inset 0 0 15px rgba(56, 189, 248, 0.05);
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
+        }
+        .cyber-border-danger {
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.15), inset 0 0 15px rgba(244, 63, 94, 0.05);
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+        .glow-danger {
+            text-shadow: 0 0 8px rgba(244, 63, 94, 0.8);
+        }
+        /* Grid overlay background effect */
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        /* SVG Map Styling */
+        #world-map-svg path {
+            fill: #0c1a2e;
+            stroke: #1e3a5f;
+            stroke-width: 0.8;
+            transition: all 0.3s ease;
+        }
+        #world-map-svg path:hover {
+            fill: #132b4a;
+            stroke: #38bdf8;
+            cursor: pointer;
+        }
+        #world-map-svg path.japan-land {
+            fill: #3b0764;
+            stroke: #f43f5e;
+            stroke-width: 1.5;
+            animation: pulse-japan 2s infinite alternate;
+        }
+        @keyframes pulse-japan {
+            0% { fill: #3b0764; stroke: #f43f5e; }
+            100% { fill: #581c87; stroke: #fb7185; }
+        }
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(3, 7, 18, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 2px;
+        }
+        /* Scanline effect */
+        .scanline {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: 40;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative grid-bg overflow-hidden">
+    <!-- Scanline visual filter -->
+    <div class="scanline"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="app-container" class="relative w-full h-full flex flex-col justify-between p-3 md:p-5 z-10 pointer-events-none">
+
+        <!-- HEADER HUD -->
+        <header class="w-full flex flex-wrap justify-between items-center cyber-border rounded-lg p-3 md:px-6 pointer-events-auto z-20">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                <div>
+                    <h1 class="font-orbitron text-lg md:text-xl font-bold tracking-wider text-white glow-text flex items-center gap-2">
+                        <i class="fa-solid font-bold fa-shield-halved text-cyan-400"></i>
+                        JAPAN CYBER THREAT MONITOR
+                    </h1>
+                    <p class="text-xs text-cyan-400 opacity-80">REAL-TIME GLOBAL THREAT VISUALIZER (NICTER SIMULATION ENGINE)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs md:text-sm my-2 sm:my-0">
+                <div class="flex flex-col items-end">
+                    <span class="text-gray-400 text-[10px]">DEFCON LEVEL</span>
+                    <span class="font-orbitron font-bold text-rose-500 text-sm glow-danger animate-pulse">LEVEL 2 - ELEVATED</span>
+                </div>
+                <div class="h-8 w-[1px] bg-cyan-900"></div>
+                <div class="flex flex-col items-end">
+                    <span class="text-gray-400 text-[10px]">MONITORED TARGET</span>
+                    <span class="font-orbitron font-semibold text-emerald-400">TOKYO / JAPAN (139.69, 35.68)</span>
+                </div>
+            </div>
+
+            <!-- CONTROLS & SOUND -->
+            <div class="flex items-center gap-2">
+                <button id="btn-pause" onclick="togglePause()" class="px-3 py-1.5 rounded border border-cyan-700 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 text-xs font-semibold transition">
+                    <i class="fa-solid fa-pause mr-1"></i> PAUSE
+                </button>
+                <button id="btn-speed" onclick="toggleSpeed()" class="px-3 py-1.5 rounded border border-cyan-700 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 text-xs font-semibold transition">
+                    <i class="fa-solid fa-bolt mr-1"></i> <span id="speed-text">1.0x</span>
+                </button>
+                <button id="btn-sound" onclick="toggleSound()" class="px-3 py-1.5 rounded border border-cyan-700 bg-cyan-950 hover:bg-cyan-900 text-cyan-300 text-xs font-semibold transition">
+                    <i class="fa-solid fa-volume-xmark text-rose-400" id="sound-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- CENTER HUD & CANVAS LAYER -->
+        <div class="absolute inset-0 w-full h-full pointer-events-auto">
+            <!-- Vector World Map SVG Background -->
+            <svg id="world-map-svg" class="w-full h-full absolute inset-0" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+                <!-- SVG map generated dynamically via JS for accuracy -->
+            </svg>
+
+            <!-- HTML5 Canvas for Animated Attack Rays & Particles -->
+            <canvas id="canvas" class="w-full h-full absolute inset-0 pointer-events-none"></canvas>
+        </div>
+
+        <!-- BOTTOM HUD PANELS -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-12 gap-4 pointer-events-auto z-20">
+            
+            <!-- LEFT PANEL: REALTIME INCIDENT LOG -->
+            <div class="md:col-span-4 lg:col-span-3 cyber-border rounded-lg p-3 flex flex-col h-48 md:h-60">
+                <div class="flex justify-between items-center mb-2 border-b border-cyan-900/60 pb-1.5">
+                    <span class="font-orbitron text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-ul text-cyan-400"></i> LIVE THREAT STREAM
+                    </span>
+                    <span id="threat-counter" class="text-[10px] bg-cyan-950 border border-cyan-800 text-cyan-300 px-1.5 py-0.5 rounded">0 PKTS</span>
+                </div>
+                <div id="log-container" class="flex-1 overflow-y-auto space-y-1.5 text-[11px] pr-1">
+                    <!-- Dynamic Log Items Inserted Here -->
+                </div>
+            </div>
+
+            <!-- CENTER PANEL: THREAT BREAKDOWN STATISTICS -->
+            <div class="hidden lg:flex lg:col-span-6 cyber-border rounded-lg p-3 flex-col justify-between h-60">
+                <div class="flex justify-between items-center border-b border-cyan-900/60 pb-1.5">
+                    <span class="font-orbitron text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-pie text-cyan-400"></i> VECTOR ANALYSIS & BANDWIDTH IMPACT
+                    </span>
+                    <span class="text-[10px] text-gray-400">AUTO-REFRESH: REALTIME</span>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 my-2">
+                    <div class="bg-cyan-950/40 border border-cyan-900/80 rounded p-2 text-center">
+                        <div class="text-[10px] text-gray-400">DDoS ATTACKS</div>
+                        <div id="stat-ddos" class="font-orbitron text-lg font-bold text-rose-500">0</div>
+                        <div class="w-full bg-gray-800 h-1 rounded-full mt-1 overflow-hidden">
+                            <div id="bar-ddos" class="bg-rose-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                    <div class="bg-cyan-950/40 border border-cyan-900/80 rounded p-2 text-center">
+                        <div class="text-[10px] text-gray-400">PORT SCANS</div>
+                        <div id="stat-scan" class="font-orbitron text-lg font-bold text-cyan-400">0</div>
+                        <div class="w-full bg-gray-800 h-1 rounded-full mt-1 overflow-hidden">
+                            <div id="bar-scan" class="bg-cyan-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                    <div class="bg-cyan-950/40 border border-cyan-900/80 rounded p-2 text-center">
+                        <div class="text-[10px] text-gray-400">MALWARE BOTNET</div>
+                        <div id="stat-malware" class="font-orbitron text-lg font-bold text-amber-400">0</div>
+                        <div class="w-full bg-gray-800 h-1 rounded-full mt-1 overflow-hidden">
+                            <div id="bar-malware" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                    <div class="bg-cyan-950/40 border border-cyan-900/80 rounded p-2 text-center">
+                        <div class="text-[10px] text-gray-400">EXPLOIT PROBES</div>
+                        <div id="stat-exploit" class="font-orbitron text-lg font-bold text-purple-400">0</div>
+                        <div class="w-full bg-gray-800 h-1 rounded-full mt-1 overflow-hidden">
+                            <div id="bar-exploit" class="bg-purple-400 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Top Origin Countries list -->
+                <div class="flex items-center gap-4 text-xs bg-slate-950/60 p-2 rounded border border-cyan-950">
+                    <span class="text-gray-400 font-bold text-[10px] uppercase">Top Origin Sources:</span>
+                    <div id="top-origins" class="flex items-center gap-3 flex-1 overflow-x-auto text-[11px]">
+                        <!-- Dynamic Origins -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: TARGET STATUS & ELECTROMAGNETIC SPECTRUM NOTE -->
+            <div class="md:col-span-8 lg:col-span-3 cyber-border rounded-lg p-3 flex flex-col justify-between h-48 md:h-60">
+                <div class="flex justify-between items-center border-b border-cyan-900/60 pb-1.5">
+                    <span class="font-orbitron text-xs font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-microchip text-cyan-400"></i> NODE SYSTEM STATUS
+                    </span>
+                    <span class="text-[10px] text-emerald-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> ONLINE
+                    </span>
+                </div>
+
+                <div class="space-y-2 my-1 text-xs">
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Target IP Infrastructure:</span>
+                        <span class="text-white font-mono">133.242.0.1 / JP-DARKNET</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Packet Ingestion Bandwidth:</span>
+                        <span id="bandwidth-val" class="text-cyan-400 font-mono">42.8 Gbps</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Active Node Shields:</span>
+                        <span class="text-emerald-400 font-mono">99.4% OPERATIONAL</span>
+                    </div>
+                </div>
+
+                <!-- Scientific Clarification Box -->
+                <div class="bg-cyan-950/30 border border-cyan-800/40 p-2 rounded text-[10px] text-gray-300 font-sans-custom leading-tight">
+                    <span class="text-cyan-400 font-bold font-mono">[サイバー空間と電磁波に関する技術ノート]</span><br>
+                    可視化されている通信はパケット（データ）の動向です。Wi-Fi/4G/5G等の通信電波は国際安全基準（ICNIRP）内で管理されており、サイバー攻撃データ自体が人体に有害な特殊電磁波へ変化することはありません。
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // High-precision geographic coordinates translated to map canvas coordinates
+        // Base SVG ViewBox: 1000 x 500 (Equirectangular Projection)
+        const MAP_WIDTH = 1000;
+        const MAP_HEIGHT = 500;
+
+        // Convert Lon/Lat to Map X/Y
+        function lonLatToXY(lon, lat) {
+            const x = (lon + 180) * (MAP_WIDTH / 360);
+            const y = (90 - lat) * (MAP_HEIGHT / 180);
+            return { x, y };
+        }
+
+        // Target: Japan (Tokyo)
+        const TARGET_JAPAN = { 
+            name: "Japan (Tokyo Hub)", 
+            lon: 139.69, 
+            lat: 35.68,
+            ip: "210.140.10.42"
+        };
+
+        // Origin Nodes
+        const ATTACK_ORIGINS = [
+            { id: "US_E", name: "USA (East Coast)", country: "USA", flag: "🇺🇸", lon: -74.00, lat: 40.71, ipPrefix: "198.51" },
+            { id: "US_W", name: "USA (West Coast)", country: "USA", flag: "🇺🇸", lon: -122.41, lat: 37.77, ipPrefix: "142.250" },
+            { id: "EU_CENTRAL", name: "Europe (Germany)", country: "DEU", flag: "🇩🇪", lon: 13.40, lat: 52.52, ipPrefix: "85.214" },
+            { id: "EU_WEST", name: "Europe (UK)", country: "GBR", flag: "🇬🇧", lon: -0.12, lat: 51.50, ipPrefix: "185.60" },
+            { id: "EA_1", name: "East Asia (Mainland)", country: "CHN", flag: "🇨🇳", lon: 116.40, lat: 39.90, ipPrefix: "220.181" },
+            { id: "EA_2", name: "East Asia (Korea)", country: "KOR", flag: "🇰🇷", lon: 126.97, lat: 37.56, ipPrefix: "211.233" },
+            { id: "SEA_1", name: "SE Asia (Singapore)", country: "SGP", flag: "🇸🇬", lon: 103.81, lat: 1.35, ipPrefix: "128.199" },
+            { id: "SA_1", name: "South America (Brazil)", country: "BRA", flag: "🇧🇷", lon: -46.63, lat: -23.55, ipPrefix: "177.18" },
+            { id: "AUS", name: "Australia (Sydney)", country: "AUS", flag: "🇦🇺", lon: 151.20, lat: -33.86, ipPrefix: "139.130" },
+            { id: "RU_W", name: "Eurasia (Moscow)", country: "RUS", flag: "🇷🇺", lon: 37.61, lat: 55.75, ipPrefix: "95.173" },
+            { id: "IND", name: "South Asia (India)", country: "IND", flag: "🇮🇳", lon: 77.20, lat: 28.61, ipPrefix: "103.21" }
+        ];
+
+        // Attack Types definition
+        const ATTACK_TYPES = [
+            { type: "DDoS", name: "SYN-Flood DDoS", color: "#f43f5e", port: "80 / 443", icon: "fa-bomb" },
+            { type: "Scan", name: "TCP Port Scan", color: "#38bdf8", port: "22 / 3389", icon: "fa-radar" },
+            { type: "Malware", name: "Mirai Botnet Command", color: "#fbbf24", port: "23 / 7547", icon: "fa-bug" },
+            { type: "Exploit", name: "Zero-Day CVE Probe", color: "#c084fc", port: "8080 / 445", icon: "fa-user-ninja" }
+        ];
+
+        // Global State
+        let isPaused = false;
+        let speedMultiplier = 1.0;
+        let isMuted = true;
+        let activeArcs = [];
+        let totalPacketsCount = 0;
+        let attackStats = { DDoS: 0, Scan: 0, Malware: 0, Exploit: 0 };
+        let originCounts = {};
+
+        // Audio Context Setup (Synth SFX without external audio dependencies)
+        let audioCtx = null;
+
+        function playBeep(freq = 600, duration = 0.05) {
+            if (isMuted) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Audio fallback silence
+            }
+        }
+
+        // Render Realistic World Map Paths into SVG
+        function renderMapSVG() {
+            const svg = document.getElementById('world-map-svg');
+            
+            // Vector Paths for simplified accurate continent outlines (1000x500 map)
+            const mapPaths = [
+                // North America
+                { d: "M 120,70 L 160,50 L 220,60 L 290,65 L 320,100 L 270,140 L 230,170 L 200,230 L 160,200 L 140,150 L 110,120 Z", id: "na" },
+                { d: "M 160,205 L 185,225 L 210,260 L 190,265 L 165,230 Z", id: "ca" },
+                // South America
+                { d: "M 220,270 L 290,285 L 340,340 L 310,420 L 260,450 L 230,380 L 210,310 Z", id: "sa" },
+                // Europe
+                { d: "M 460,80 L 520,75 L 560,95 L 540,140 L 490,165 L 450,140 L 440,105 Z", id: "eu" },
+                { d: "M 420,90 L 445,80 L 450,110 L 425,115 Z", id: "uk" },
+                // Africa
+                { d: "M 440,175 L 530,170 L 580,240 L 540,340 L 480,370 L 440,290 L 420,220 Z", id: "af" },
+                // Asia / Eurasia
+                { d: "M 545,75 L 750,55 L 900,70 L 920,130 L 860,180 L 780,220 L 710,220 L 680,180 L 570,145 Z", id: "asia" },
+                { d: "M 670,195 L 720,190 L 730,250 L 680,260 L 660,220 Z", id: "india" },
+                { d: "M 740,230 L 790,230 L 810,280 L 760,290 Z", id: "seasia" },
+                // Australia
+                { d: "M 790,320 L 890,310 L 910,380 L 870,420 L 780,390 Z", id: "aus" },
+                // Japan (Detailed Target Island Arc)
+                { d: "M 860,135 Q 870,125 875,130 L 888,148 L 882,165 L 870,175 L 860,160 Z", id: "jp", class: "japan-land" }
+            ];
+
+            let svgContent = `
+                <defs>
+                    <filter id="glow-target" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <g id="continents">
+            `;
+
+            mapPaths.forEach(path => {
+                const cls = path.class ? `class="${path.class}"` : '';
+                svgContent += `<path d="${path.d}" id="${path.id}" ${cls} />`;
+            });
+
+            svgContent += `</g>`;
+
+            // Draw Node Indicators on SVG
+            ATTACK_ORIGINS.forEach(origin => {
+                const pos = lonLatToXY(origin.lon, origin.lat);
+                svgContent += `
+                    <g transform="translate(${pos.x}, ${pos.y})">
+                        <circle r="3" fill="#38bdf8" opacity="0.8" />
+                        <circle r="7" fill="none" stroke="#38bdf8" stroke-width="0.8" opacity="0.4">
+                            <animate attributeName="r" values="3;10;3" dur="3s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.8;0;0.8" dur="3s" repeatCount="indefinite" />
+                        </circle>
+                    </g>
+                `;
+            });
+
+            // Target Node (Japan Tokyo)
+            const targetPos = lonLatToXY(TARGET_JAPAN.lon, TARGET_JAPAN.lat);
+            svgContent += `
+                <g transform="translate(${targetPos.x}, ${targetPos.y})" filter="url(#glow-target)">
+                    <circle r="5" fill="#f43f5e" />
+                    <circle r="14" fill="none" stroke="#f43f5e" stroke-width="1.5">
+                        <animate attributeName="r" values="5;22;5" dur="1.8s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="1;0;1" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
+                    <text x="12" y="4" fill="#ffffff" font-size="10" font-family="'Orbitron', sans-serif" font-weight="bold">TOKYO TARGET</text>
+                </g>
+            `;
+
+            svg.innerHTML = svgContent;
+        }
+
+        // Initialize Canvas Animation Engine
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Calculate Pixel Screen Coordinate for Map Ratio
+        function getScreenCoords(lon, lat) {
+            const svgContainer = document.getElementById('world-map-svg');
+            const rect = svgContainer.getBoundingClientRect();
+            
+            // Map aspect ratio logic
+            const scaleX = rect.width / MAP_WIDTH;
+            const scaleY = rect.height / MAP_HEIGHT;
+
+            const mapPos = lonLatToXY(lon, lat);
+            return {
+                x: rect.left + mapPos.x * scaleX,
+                y: rect.top + mapPos.y * scaleY
+            };
+        }
+
+        // Spawn a Attack Beam Animation
+        function spawnAttackEvent() {
+            if (isPaused) return;
+
+            const origin = ATTACK_ORIGINS[Math.floor(Math.random() * ATTACK_ORIGINS.length)];
+            const attackType = ATTACK_TYPES[Math.floor(Math.random() * ATTACK_TYPES.length)];
+            
+            const startPos = getScreenCoords(origin.lon, origin.lat);
+            const targetPos = getScreenCoords(TARGET_JAPAN.lon, TARGET_JAPAN.lat);
+
+            const randomIP = `${origin.ipPrefix}.${Math.floor(Math.random()*254+1)}.${Math.floor(Math.random()*254+1)}`;
+
+            const newArc = {
+                sx: startPos.x,
+                sy: startPos.y,
+                tx: targetPos.x,
+                ty: targetPos.y,
+                progress: 0,
+                speed: (0.006 + Math.random() * 0.008) * speedMultiplier,
+                color: attackType.color,
+                type: attackType.type,
+                typeName: attackType.name,
+                port: attackType.port,
+                originName: origin.name,
+                country: origin.country,
+                flag: origin.flag,
+                ip: randomIP,
+                height: 40 + Math.random() * 80 // Curve height
+            };
+
+            activeArcs.push(newArc);
+            totalPacketsCount++;
+
+            // Update Stats
+            attackStats[attackType.type]++;
+            originCounts[origin.country] = (originCounts[origin.country] || 0) + 1;
+
+            updateUI(newArc);
+            playBeep(400 + Math.random() * 400, 0.03);
+        }
+
+        // Draw Loop
+        function animate() {
+            // Semi-transparent clear to leave smooth particle motion blur
+            ctx.fillStyle = 'rgba(3, 7, 18, 0.25)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = activeArcs.length - 1; i >= 0; i--) {
+                const arc = activeArcs[i];
+                if (!isPaused) {
+                    arc.progress += arc.speed;
+                }
+
+                // Current position on quadratic bezier curve
+                const t = arc.progress;
+                const midX = (arc.sx + arc.tx) / 2;
+                const midY = Math.min(arc.sy, arc.ty) - arc.height;
+
+                // Bezier Point Calculation
+                const curX = (1 - t) * (1 - t) * arc.sx + 2 * (1 - t) * t * midX + t * t * arc.tx;
+                const curY = (1 - t) * (1 - t) * arc.sy + 2 * (1 - t) * t * midY + t * t * arc.ty;
+
+                // Draw Arc Trajectory Line
+                ctx.beginPath();
+                ctx.moveTo(arc.sx, arc.sy);
+                ctx.quadraticCurveTo(midX, midY, curX, curY);
+                ctx.strokeStyle = arc.color;
+                ctx.lineWidth = 1.5;
+                ctx.globalAlpha = 0.4;
+                ctx.stroke();
+
+                // Draw Head Glowing Bullet
+                ctx.beginPath();
+                ctx.arc(curX, curY, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = arc.color;
+                ctx.globalAlpha = 1.0;
+                ctx.fill();
+                ctx.shadowBlur = 0; // Reset glow
+
+                // Impact upon arrival
+                if (arc.progress >= 1) {
+                    createImpactRipple(arc.tx, arc.ty, arc.color);
+                    activeArcs.splice(i, 1);
+                    playBeep(200, 0.08);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Impact Ring Effect on Japan Target
+        let ripples = [];
+        function createImpactRipple(x, y, color) {
+            // Visual splash at target
+            const logContainer = document.getElementById('log-container');
+            if(logContainer.children.length > 0) {
+                logContainer.children[0].classList.add('border-l-4', 'border-rose-500');
+            }
+        }
+
+        // Update UI Panel elements
+        function updateUI(latestArc) {
+            // Update counter
+            document.getElementById('threat-counter').innerText = `${totalPacketsCount} PKTS`;
+
+            // Append Log Entry
+            const logContainer = document.getElementById('log-container');
+            const logItem = document.createElement('div');
+            logItem.className = 'cyber-border rounded p-1.5 flex items-center justify-between text-[11px] animate-fadeIn';
+            logItem.innerHTML = `
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                    <span>${latestArc.flag}</span>
+                    <span class="font-bold text-white truncate">${latestArc.ip}</span>
+                    <span class="text-[9px] px-1 bg-cyan-950 border border-cyan-800 rounded text-cyan-300">${latestArc.type}</span>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <span style="color: ${latestArc.color}" class="font-bold">${latestArc.port}</span>
+                </div>
+            `;
+
+            logContainer.insertBefore(logItem, logContainer.firstChild);
+            if (logContainer.children.length > 25) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+
+            // Update Stats Graphs
+            document.getElementById('stat-ddos').innerText = attackStats.DDoS;
+            document.getElementById('stat-scan').innerText = attackStats.Scan;
+            document.getElementById('stat-malware').innerText = attackStats.Malware;
+            document.getElementById('stat-exploit').innerText = attackStats.Exploit;
+
+            const total = totalPacketsCount || 1;
+            document.getElementById('bar-ddos').style.width = `${(attackStats.DDoS / total) * 100}%`;
+            document.getElementById('bar-scan').style.width = `${(attackStats.Scan / total) * 100}%`;
+            document.getElementById('bar-malware').style.width = `${(attackStats.Malware / total) * 100}%`;
+            document.getElementById('bar-exploit').style.width = `${(attackStats.Exploit / total) * 100}%`;
+
+            // Update Top Origins
+            const topOriginsContainer = document.getElementById('top-origins');
+            const sortedOrigins = Object.entries(originCounts).sort((a,b) => b[1] - a[1]).slice(0, 4);
+            topOriginsContainer.innerHTML = sortedOrigins.map(([country, count]) => `
+                <span class="bg-cyan-950 text-cyan-200 px-2 py-0.5 rounded border border-cyan-800 font-mono">
+                    ${country}: <strong class="text-white">${count}</strong>
+                </span>
+            `).join('');
+
+            // Dynamic Bandwidth simulation
+            const bandwidth = (35 + (totalPacketsCount % 30) * 0.7).toFixed(1);
+            document.getElementById('bandwidth-val').innerText = `${bandwidth} Gbps`;
+        }
+
+        // Control Actions
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('btn-pause');
+            btn.innerHTML = isPaused ? '<i class="fa-solid fa-play mr-1"></i> RESUME' : '<i class="fa-solid fa-pause mr-1"></i> PAUSE';
+            btn.classList.toggle('bg-rose-950', isPaused);
+            btn.classList.toggle('border-rose-700', isPaused);
+        }
+
+        function toggleSpeed() {
+            if (speedMultiplier === 1.0) speedMultiplier = 2.0;
+            else if (speedMultiplier === 2.0) speedMultiplier = 4.0;
+            else speedMultiplier = 1.0;
+            
+            document.getElementById('speed-text').innerText = `${speedMultiplier.toFixed(1)}x`;
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('sound-icon');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-rose-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+                playBeep(800, 0.1);
+            }
+        }
+
+        // Initialize App
+        window.onload = function() {
+            renderMapSVG();
+            animate();
+
+            // Spawn loop with variable frequency
+            function loop() {
+                spawnAttackEvent();
+                const nextDelay = (300 + Math.random() * 500) / speedMultiplier;
+                setTimeout(loop, nextDelay);
+            }
+            loop();
+        };
+    </script>
+</body>
+</html>
