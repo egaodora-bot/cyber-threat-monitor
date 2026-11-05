@@ -31,12 +31,11 @@
             left: 0;
             display: block;
         }
-        /* コントロールパネル（左上） */
         .hud-main {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(8, 15, 30, 0.92);
+            background: rgba(8, 15, 30, 0.95);
             border: 1px solid #1e3a8a;
             border-left: 4px solid #ef4444;
             padding: 16px;
@@ -139,12 +138,11 @@
             overflow: hidden;
             line-height: 1.3;
         }
-        /* 解説パネル（右下） */
         .explanation-panel {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            background: rgba(8, 15, 30, 0.92);
+            background: rgba(8, 15, 30, 0.95);
             border: 1px solid #1e3a8a;
             padding: 14px;
             border-radius: 6px;
@@ -190,14 +188,12 @@
             <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="3" />
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
-        <!-- 国別・地域別の発信元表示 -->
         <text x="170" y="105" fill="#94a3b8" font-size="11" font-weight="bold">🇺🇸 アメリカ / 踏み台網</text>
         <text x="450" y="85" fill="#94a3b8" font-size="11" font-weight="bold">🇷🇺 ロシア (サイバー攻撃拠点)</text>
         <text x="650" y="65" fill="#ef4444" font-size="11" font-weight="bold">🇨🇳 中国 / 🇰🇵 北朝鮮 (主要脅威)</text>
         <text x="190" y="310" fill="#94a3b8" font-size="11" font-weight="bold">🌎 南米プロキシ</text>
         <text x="770" y="410" fill="#94a3b8" font-size="11" font-weight="bold">🇦🇺 オーストラリア</text>
 
-        <!-- 日本の防衛拠点 -->
         <text x="820" y="120" fill="#ef4444" font-size="11" font-weight="bold">🔴 東京 (首都圏・主要IX)</text>
         <circle cx="890" cy="145" r="5" fill="#ef4444" />
 
@@ -257,7 +253,7 @@
         </div>
 
         <div class="stat-label" style="margin-bottom: 2px;">リアルタイム防衛・遮断ログ:</div>
-        <div id="log" class="log-box">防衛システム稼働中。全回線監視中...</div>
+        <div id="log" class="log-box">防衛システム稼働中。監視を開始します...</div>
     </div>
 
     <div class="explanation-panel">
@@ -278,7 +274,7 @@
 </div>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
+    // 即時実行で確実に動作させる
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const logEl = document.getElementById('log');
@@ -312,115 +308,3 @@ window.addEventListener('DOMContentLoaded', () => {
         { x: 0.25, y: 0.58, name: "南米プロキシ" },
         { x: 0.82, y: 0.78, name: "豪州中継点" }
     ];
-
-    const attackTypes = [
-        { id: 'scan', name: "不正アクセスの下見（スキャン）", color: "#38bdf8" },
-        { id: 'ddos', name: "サーバー破壊攻撃（DDoS）", color: "#ef4444" },
-        { id: 'ping', name: "生存確認の通信（Ping）", color: "#f1f5f9" }
-    ];
-
-    let activePackets = [];
-    let totalPacketsCount = 0;
-    let blockedCount = 0;
-    let stats = { scan: 0, ddos: 0, ping: 0 };
-
-    function spawnPacket() {
-        const src = sources[Math.floor(Math.random() * sources.length)];
-        const target = targets[Math.floor(Math.random() * targets.length)];
-        const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
-        
-        stats[attack.id]++;
-        totalPacketsCount++;
-
-        activePackets.push({
-            sx: src.x * canvas.width,
-            sy: src.y * canvas.height,
-            tx: target.x * canvas.width,
-            ty: target.y * canvas.height,
-            progress: 0,
-            speed: 0.004 + Math.random() * 0.005,
-            color: attack.color,
-            attackName: attack.name,
-            sourceName: src.name,
-            targetName: target.name,
-            isBlocked: false
-        });
-
-        if (Math.random() > 0.35) {
-            blockedCount++;
-            countBlockedEl.innerText = blockedCount.toLocaleString();
-            activePackets.push({
-                sx: target.x * canvas.width,
-                sy: target.y * canvas.height,
-                tx: src.x * canvas.width,
-                ty: src.y * canvas.height,
-                progress: 0,
-                speed: 0.008 + Math.random() * 0.005,
-                color: "#10b981",
-                attackName: "ファイアウォール自動遮断",
-                sourceName: target.name,
-                targetName: src.name,
-                isBlocked: true
-            });
-        }
-
-        countTotalEl.innerText = totalPacketsCount.toLocaleString();
-
-        const sPct = Math.round((stats.scan / totalPacketsCount) * 100);
-        const dPct = Math.round((stats.ddos / totalPacketsCount) * 100);
-        const pPct = 100 - (sPct + dPct);
-
-        barScan.style.width = sPct + '%';
-        barDdos.style.width = dPct + '%';
-        barPing.style.width = pPct + '%';
-
-        ratioScan.innerText = sPct + '%';
-        ratioDdos.innerText = dPct + '%';
-        ratioPing.innerText = pPct + '%';
-
-        logEl.innerHTML = `<b>【${src.name}】</b> ➔ <b>${target.name}</b><br><span style="color:${attack.color}">➔ ${attack.name}</span>`;
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        targets.forEach(t => {
-            const tx = t.x * canvas.width;
-            const ty = t.y * canvas.height;
-            ctx.beginPath();
-            ctx.arc(tx, ty, 14 + (Date.now() / 30) % 30, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        });
-
-        for (let i = activePackets.length - 1; i >= 0; i--) {
-            const p = activePackets[i];
-            p.progress += p.speed;
-
-            const curX = p.sx + (p.tx - p.sx) * p.progress;
-            const arcHeight = Math.sin(p.progress * Math.PI) * -95;
-            const curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
-
-            ctx.beginPath();
-            ctx.arc(curX, curY, p.isBlocked ? 3.5 : 4.5, 0, Math.PI * 2);
-            ctx.fillStyle = p.color;
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = p.color;
-            ctx.fill();
-
-            if (p.progress >= 1) {
-                activePackets.splice(i, 1);
-            }
-        }
-        ctx.shadowBlur = 0;
-
-        requestAnimationFrame(animate);
-    }
-
-    setInterval(spawnPacket, 600);
-    animate();
-});
-</script>
-</body>
-</html>
