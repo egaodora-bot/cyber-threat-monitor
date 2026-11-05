@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAPAN CYBER THREAT OPERATIONS</title>
+    <title>JAPAN CYBER DEFENSE DASHBOARD</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             padding: 0;
@@ -21,20 +19,14 @@
             width: 100vw;
             height: 100vh;
         }
-        #bg-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
         #canvas {
             position: absolute;
             top: 0;
             left: 0;
             display: block;
         }
+
+        /* 左上：メインステータス */
         .hud-main {
             position: absolute;
             top: 20px;
@@ -42,94 +34,42 @@
             background: rgba(8, 15, 30, 0.95);
             border: 1px solid #1e3a8a;
             border-left: 4px solid #ef4444;
-            padding: 16px;
+            padding: 14px;
             border-radius: 6px;
             z-index: 10;
-            width: 380px;
+            width: 320px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .header-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
         h1 {
-            margin: 0;
+            margin: 0 0 4px 0;
             font-size: 13px;
             color: #f8fafc;
-            letter-spacing: 1px;
-        }
-        .status-badge {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: bold;
         }
         .subtitle {
             font-size: 10px;
             color: #94a3b8;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .stat-card {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid #1e293b;
-            padding: 8px;
+            padding: 6px 8px;
             border-radius: 4px;
         }
         .stat-label {
             font-size: 9px;
             color: #64748b;
-            margin-bottom: 2px;
         }
         .stat-value {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             color: #f8fafc;
-        }
-        .risk-section {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid #1e293b;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .risk-title {
-            font-size: 10px;
-            color: #38bdf8;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-        .bar-container {
-            margin-bottom: 6px;
-        }
-        .bar-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: #cbd5e1;
-            margin-bottom: 2px;
-        }
-        .bar-track {
-            background: #020617;
-            height: 5px;
-            border-radius: 2px;
-            overflow: hidden;
-            border: 1px solid #1e293b;
-        }
-        .bar-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
         }
         .log-box {
             font-size: 10px;
@@ -138,35 +78,37 @@
             border: 1px solid #1e293b;
             padding: 6px;
             border-radius: 4px;
-            height: 38px;
+            height: 36px;
             overflow: hidden;
             line-height: 1.3;
         }
+
+        /* 左下：凡例・ガイド */
         .explanation-panel {
             position: absolute;
             bottom: 20px;
-            right: 20px;
+            left: 20px;
             background: rgba(8, 15, 30, 0.95);
             border: 1px solid #1e3a8a;
-            padding: 14px;
+            padding: 12px;
             border-radius: 6px;
             z-index: 10;
-            width: 350px;
+            width: 320px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .exp-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: #38bdf8;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #1e293b;
             padding-bottom: 4px;
         }
         .exp-row {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 8px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-size: 10px;
             color: #94a3b8;
         }
@@ -174,52 +116,54 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-top: 2px;
             flex-shrink: 0;
         }
-        .exp-text b { color: #f8fafc; }
+
+        /* ノード用オーバーレイテキストラベル */
+        .node-label-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .node-tag {
+            position: absolute;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .tag-source {
+            color: #cbd5e1;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #334155;
+        }
+        .tag-target {
+            color: #f8fafc;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <svg id="bg-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <g stroke="#0f172a" stroke-width="0.5">
-            <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
-            <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
-            <line x1="0" y1="375" x2="1000" y2="375" stroke-dasharray="3" />
-            <line x1="250" y1="0" x2="250" y2="500" stroke-dasharray="3" />
-            <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="3" />
-            <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
-        </g>
-        <text x="170" y="105" fill="#94a3b8" font-size="11" font-weight="bold">🇺🇸 アメリカ / 踏み台網</text>
-        <text x="450" y="85" fill="#94a3b8" font-size="11" font-weight="bold">🇷🇺 ロシア (サイバー攻撃拠点)</text>
-        <text x="650" y="65" fill="#ef4444" font-size="11" font-weight="bold">🇨🇳 中国 / 🇰🇵 北朝鮮 (主要脅威)</text>
-        <text x="190" y="310" fill="#94a3b8" font-size="11" font-weight="bold">🌎 南米プロキシ</text>
-        <text x="770" y="410" fill="#94a3b8" font-size="11" font-weight="bold">🇦🇺 オーストラリア</text>
-
-        <text x="820" y="120" fill="#ef4444" font-size="11" font-weight="bold">🔴 東京 (首都圏・主要IX)</text>
-        <circle cx="890" cy="145" r="5" fill="#ef4444" />
-
-        <text x="820" y="180" fill="#f59e0b" font-size="11" font-weight="bold">🟠 大阪 (関西データセンター)</text>
-        <circle cx="870" cy="200" r="4.5" fill="#f59e0b" />
-
-        <text x="820" y="240" fill="#3b82f6" font-size="11" font-weight="bold">🔵 福岡 (西日本ゲートウェイ)</text>
-        <circle cx="840" cy="255" r="4" fill="#3b82f6" />
-    </svg>
-
     <canvas id="canvas"></canvas>
 
+    <!-- ダッシュボードパネル -->
     <div class="hud-main">
-        <div class="header-title">
-            <h1>JAPAN CYBER DEFENSE MONITOR</h1>
-            <div class="status-badge">LIVE 警戒中</div>
-        </div>
-        <div class="subtitle">日本インフラへの国家・組織型ハッキングの迎撃状況</div>
+        <h1>🇯🇵 日本サイバー防衛・国別監視</h1>
+        <div class="subtitle">国別攻撃元 ➔ 日本拠点へのリアルタイム攻防</div>
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">総侵入試行数</div>
+                <div class="stat-label">総検知数</div>
                 <div id="count-total" class="stat-value">0</div>
             </div>
             <div class="stat-card">
@@ -228,53 +172,29 @@
             </div>
         </div>
 
-        <div class="risk-section">
-            <div class="risk-title">📊 脅威リスク・手口分析メーター</div>
-            
-            <div class="bar-container">
-                <div class="bar-header">
-                    <span style="color: #38bdf8;">🔵 不正アクセスの下見・スキャン</span>
-                    <span id="ratio-scan">0%</span>
-                </div>
-                <div class="bar-track"><div id="bar-scan" class="bar-fill" style="background: #38bdf8;"></div></div>
-            </div>
-
-            <div class="bar-container">
-                <div class="bar-header">
-                    <span style="color: #ef4444;">🔴 サーバー破壊・サービス停止 (DDoS)</span>
-                    <span id="ratio-ddos">0%</span>
-                </div>
-                <div class="bar-track"><div id="bar-ddos" class="bar-fill" style="background: #ef4444;"></div></div>
-            </div>
-
-            <div class="bar-container">
-                <div class="bar-header">
-                    <span style="color: #f1f5f9;">⚪ ネットワーク生存確認 (Ping)</span>
-                    <span id="ratio-ping">0%</span>
-                </div>
-                <div class="bar-track"><div id="bar-ping" class="bar-fill" style="background: #f1f5f9;"></div></div>
-            </div>
-        </div>
-
-        <div class="stat-label" style="margin-bottom: 2px;">リアルタイム防衛・遮断ログ:</div>
-        <div id="log" class="log-box">防衛システム稼働中...</div>
+        <div class="stat-label" style="margin-bottom: 2px;">最新の検知ログ:</div>
+        <div id="log" class="log-box">防衛システム監視中...</div>
     </div>
 
+    <!-- 画面ガイド -->
     <div class="explanation-panel">
-        <div class="exp-title">🛡️ ハッキングリスクとアニメーションの見方</div>
+        <div class="exp-title">🛡️ 攻撃と反撃（遮断）シグナルの見方</div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #ef4444;"></div>
-            <div class="exp-text"><b>赤い光（中国・ロシア等の脅威）：</b> サーバーを狙った集中攻撃や破壊工作の波。</div>
+            <span><b>赤（右方向）：</b> サーバー破壊・DDoS攻撃</span>
         </div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #38bdf8;"></div>
-            <div class="exp-text"><b>青い光（スキャン）：</b> 侵入できる隙がないか探る不正アクセスの下見。</div>
+            <span><b>青（右方向）：</b> 不正アクセスの下見・スキャン</span>
         </div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #10b981;"></div>
-            <div class="exp-text"><b>緑の光（自動ブロック）：</b> 被害を防ぐため、システムが通信を即座に遮断した瞬間。</div>
+            <span><b>緑（左方向）：</b> 日本側からの即時ブロック・応答</span>
         </div>
     </div>
+
+    <!-- テキストラベル描画用レイヤー -->
+    <div id="node-labels" class="node-label-container"></div>
 </div>
 
 <script>
@@ -284,133 +204,168 @@
     var logEl = document.getElementById('log');
     var countTotalEl = document.getElementById('count-total');
     var countBlockedEl = document.getElementById('count-blocked');
-
-    var barScan = document.getElementById('bar-scan');
-    var barDdos = document.getElementById('bar-ddos');
-    var barPing = document.getElementById('bar-ping');
-    var ratioScan = document.getElementById('ratio-scan');
-    var ratioDdos = document.getElementById('ratio-ddos');
-    var ratioPing = document.getElementById('ratio-ping');
+    var labelContainer = document.getElementById('node-labels');
 
     function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        updateLabels();
     }
     window.addEventListener('resize', resize);
-    resize();
 
-    var targets = [
-        { x: 0.89, y: 0.29, name: "東京拠点" },
-        { x: 0.87, y: 0.40, name: "大阪拠点" },
-        { x: 0.84, y: 0.51, name: "福岡拠点" }
+    // 左側に縦並び配置する「攻撃元の国・地域」
+    var sources = [
+        { name: "🇨🇳 中国 (主要脅威)", yRatio: 0.18, color: "#ef4444" },
+        { name: "🇷🇺 ロシア (攻撃拠点)", yRatio: 0.33, color: "#ef4444" },
+        { name: "🇺🇸 米国 (踏み台経由)", yRatio: 0.48, color: "#38bdf8" },
+        { name: "🇰🇵 北朝鮮 (外貨狙い)", yRatio: 0.63, color: "#ef4444" },
+        { name: "🌎 その他・南米プロキシ", yRatio: 0.78, color: "#94a3b8" }
     ];
 
-    var sources = [
-        { x: 0.68, y: 0.16, name: "中国セクター" },
-        { x: 0.48, y: 0.20, name: "ロシア網" },
-        { x: 0.22, y: 0.25, name: "米国・踏み台網" },
-        { x: 0.25, y: 0.58, name: "南米プロキシ" },
-        { x: 0.82, y: 0.78, name: "豪州中継点" }
+    // 右側に配置する「日本の防衛拠点」
+    var targets = [
+        { name: "🔴 東京 (首都圏・主要IX)", yRatio: 0.25, border: "#ef4444" },
+        { name: "🟠 大阪 (関西データセンター)", yRatio: 0.50, border: "#f59e0b" },
+        { name: "🔵 福岡 (西日本ゲートウェイ)", yRatio: 0.75, border: "#3b82f6" }
     ];
 
     var attackTypes = [
-        { id: 'scan', name: "不正アクセスの下見（スキャン）", color: "#38bdf8" },
-        { id: 'ddos', name: "サーバー破壊攻撃（DDoS）", color: "#ef4444" },
-        { id: 'ping', name: "生存確認の通信（Ping）", color: "#f1f5f9" }
+        { id: 'scan', name: "不正アクセスの下見", color: "#38bdf8" },
+        { id: 'ddos', name: "サーバー破壊攻撃 (DDoS)", color: "#ef4444" },
+        { id: 'ping', name: "生存確認通信 (Ping)", color: "#f1f5f9" }
     ];
 
     var activePackets = [];
     var totalPacketsCount = 0;
     var blockedCount = 0;
-    var stats = { scan: 0, ddos: 0, ping: 0 };
+
+    // テキストラベルの初期化・更新
+    function updateLabels() {
+        labelContainer.innerHTML = '';
+        var srcX = canvas.width * 0.36; // 発信元のX位置
+        var tgtX = canvas.width * 0.78; // ターゲットのX位置
+
+        // 左側の国リストの描画
+        for (var i = 0; i < sources.length; i++) {
+            var s = sources[i];
+            var div = document.createElement('div');
+            div.className = 'node-tag tag-source';
+            div.style.left = (srcX - 160) + 'px';
+            div.style.top = (canvas.height * s.yRatio) + 'px';
+            div.innerText = s.name;
+            labelContainer.appendChild(div);
+        }
+
+        // 右側の日本拠点の描画
+        for (var j = 0; j < targets.length; j++) {
+            var t = targets[j];
+            var divT = document.createElement('div');
+            divT.className = 'node-tag tag-target';
+            divT.style.border = '1px solid ' + t.border;
+            divT.style.left = (tgtX + 20) + 'px';
+            divT.style.top = (canvas.height * t.yRatio) + 'px';
+            divT.innerText = t.name;
+            labelContainer.appendChild(divT);
+        }
+    }
 
     function spawnPacket() {
         var src = sources[Math.floor(Math.random() * sources.length)];
         var target = targets[Math.floor(Math.random() * targets.length)];
         var attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
         
-        stats[attack.id]++;
         totalPacketsCount++;
 
+        var sx = canvas.width * 0.36;
+        var sy = canvas.height * src.yRatio;
+        var tx = canvas.width * 0.78;
+        var ty = canvas.height * target.yRatio;
+
+        // 海外 ➔ 日本への攻撃
         activePackets.push({
-            sx: src.x * canvas.width,
-            sy: src.y * canvas.height,
-            tx: target.x * canvas.width,
-            ty: target.y * canvas.height,
+            sx: sx, sy: sy, tx: tx, ty: ty,
             progress: 0,
-            speed: 0.005 + Math.random() * 0.005,
+            speed: 0.006 + Math.random() * 0.004,
             color: attack.color,
-            attackName: attack.name,
-            sourceName: src.name,
-            targetName: target.name,
             isBlocked: false
         });
 
+        // 確率で日本側から即時ブロック・返信（緑）
         if (Math.random() > 0.35) {
             blockedCount++;
             countBlockedEl.innerText = blockedCount.toLocaleString();
             activePackets.push({
-                sx: target.x * canvas.width,
-                sy: target.y * canvas.height,
-                tx: src.x * canvas.width,
-                ty: src.y * canvas.height,
+                sx: tx, sy: ty, tx: sx, ty: sy,
                 progress: 0,
-                speed: 0.008 + Math.random() * 0.005,
-                color: "#10b981",
-                attackName: "ファイアウォール自動遮断",
-                sourceName: target.name,
-                targetName: src.name,
+                speed: 0.009 + Math.random() * 0.004,
+                color: "#10b981", // 緑のブロック光
                 isBlocked: true
             });
         }
 
         countTotalEl.innerText = totalPacketsCount.toLocaleString();
-
-        var sPct = Math.round((stats.scan / totalPacketsCount) * 100);
-        var dPct = Math.round((stats.ddos / totalPacketsCount) * 100);
-        var pPct = 100 - (sPct + dPct);
-
-        barScan.style.width = sPct + '%';
-        barDdos.style.width = dPct + '%';
-        barPing.style.width = pPct + '%';
-
-        ratioScan.innerText = sPct + '%';
-        ratioDdos.innerText = dPct + '%';
-        ratioPing.innerText = pPct + '%';
-
-        logEl.innerHTML = '<b>【' + src.name + '】</b> ➔ <b>' + target.name + '</b><br><span style="color:' + attack.color + '">➔ ' + attack.name + '</span>';
+        logEl.innerHTML = '<b>【' + src.name.split(' ')[0] + '】</b> ➔ <b>' + target.name.split(' ')[0] + '</b><br><span style="color:' + attack.color + '">➔ ' + attack.name + '</span>';
     }
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        for (var t = 0; t < targets.length; t++) {
-            var tx = targets[t].x * canvas.width;
-            var ty = targets[t].y * canvas.height;
-            ctx.beginPath();
-            ctx.arc(tx, ty, 14 + (Date.now() / 30) % 30, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
+        var srcX = canvas.width * 0.36;
+        var tgtX = canvas.width * 0.78;
+
+        // 背景接続ラインの描画
+        ctx.lineWidth = 0.5;
+        for (var s = 0; s < sources.length; s++) {
+            var sy = canvas.height * sources[s].yRatio;
+            for (var t = 0; t < targets.length; t++) {
+                var ty = canvas.height * targets[t].yRatio;
+                ctx.beginPath();
+                ctx.moveTo(srcX, sy);
+                ctx.lineTo(tgtX, ty);
+                ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+                ctx.stroke();
+            }
         }
 
-        for (var i = activePackets.length - 1; i >= 0; i--) {
-            var p = activePackets[i];
+        // 発信元・到達点のノード円
+        for (var i = 0; i < sources.length; i++) {
+            ctx.beginPath();
+            ctx.arc(srcX, canvas.height * sources[i].yRatio, 6, 0, Math.PI * 2);
+            ctx.fillStyle = "#334155";
+            ctx.fill();
+        }
+        for (var j = 0; j < targets.length; j++) {
+            var ty2 = canvas.height * targets[j].yRatio;
+            ctx.beginPath();
+            ctx.arc(tgtX, ty2, 10 + (Date.now() / 30) % 20, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(tgtX, ty2, 6, 0, Math.PI * 2);
+            ctx.fillStyle = "#ef4444";
+            ctx.fill();
+        }
+
+        // 移動するパケットの描画
+        for (var k = activePackets.length - 1; k >= 0; k--) {
+            var p = activePackets[k];
             p.progress += p.speed;
 
             var curX = p.sx + (p.tx - p.sx) * p.progress;
-            var arcHeight = Math.sin(p.progress * Math.PI) * -95;
+            // わずかなカーブをつける
+            var arcHeight = Math.sin(p.progress * Math.PI) * (p.isBlocked ? 20 : -20);
             var curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
 
             ctx.beginPath();
-            ctx.arc(curX, curY, p.isBlocked ? 3.5 : 4.5, 0, Math.PI * 2);
+            ctx.arc(curX, curY, p.isBlocked ? 4 : 5, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
             ctx.shadowBlur = 10;
             ctx.shadowColor = p.color;
             ctx.fill();
 
             if (p.progress >= 1) {
-                activePackets.splice(i, 1);
+                activePackets.splice(k, 1);
             }
         }
         ctx.shadowBlur = 0;
@@ -418,9 +373,9 @@
         requestAnimationFrame(animate);
     }
 
-    // 最初に数回即時実行して確実に画面を動かす
+    resize();
     spawnPacket();
-    setInterval(spawnPacket, 600);
+    setInterval(spawnPacket, 550);
     animate();
 })();
 </script>
