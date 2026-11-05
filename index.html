@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAPAN CYBER THREAT MONITOR</title>
+    <title>JAPAN CYBER DEFENSE MONITOR</title>
     <style>
         body {
             margin: 0;
@@ -17,7 +17,6 @@
             width: 100vw;
             height: 100vh;
         }
-        /* シンプルで確実な背景グリッドとマップ代わりのエリア */
         #bg-svg {
             position: absolute;
             top: 0;
@@ -40,10 +39,10 @@
             left: 20px;
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid #38bdf8;
-            padding: 20px;
+            padding: 18px;
             border-radius: 8px;
             z-index: 10;
-            width: 360px;
+            width: 380px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         h1 {
@@ -54,12 +53,12 @@
         .subtitle {
             font-size: 11px;
             color: #94a3b8;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .stats-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             gap: 10px;
         }
         .stat-card {
@@ -72,10 +71,10 @@
         .stat-label {
             font-size: 10px;
             color: #94a3b8;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
         .stat-value {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             color: #fff;
         }
@@ -86,16 +85,16 @@
             border: 1px solid #334155;
             padding: 10px;
             border-radius: 6px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .graph-title {
             font-size: 11px;
             font-weight: bold;
             color: #cbd5e1;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .bar-wrapper {
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
         .bar-info {
             display: flex;
@@ -106,7 +105,7 @@
         }
         .bar-track {
             background: #020617;
-            height: 6px;
+            height: 5px;
             border-radius: 3px;
             overflow: hidden;
         }
@@ -124,9 +123,9 @@
             border: 1px solid #334155;
             padding: 8px;
             border-radius: 4px;
-            height: 40px;
+            height: 38px;
             overflow: hidden;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         /* 解説パネル */
@@ -136,17 +135,17 @@
             left: 20px;
             background: rgba(15, 23, 42, 0.95);
             border: 1px solid #38bdf8;
-            padding: 16px;
+            padding: 14px;
             border-radius: 8px;
             z-index: 10;
-            width: 360px;
+            width: 380px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .legend-title {
             font-size: 11px;
             font-weight: bold;
             color: #f8fafc;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #334155;
             padding-bottom: 4px;
         }
@@ -154,14 +153,14 @@
             display: flex;
             align-items: flex-start;
             gap: 8px;
-            margin-bottom: 8px;
-            font-size: 11px;
+            margin-bottom: 6px;
+            font-size: 10px;
         }
         .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-top: 3px;
+            margin-top: 2px;
             flex-shrink: 0;
         }
         .legend-text b {
@@ -169,7 +168,6 @@
             display: block;
         }
         .legend-text span {
-            font-size: 10px;
             color: #94a3b8;
         }
     </style>
@@ -177,7 +175,7 @@
 <body>
 
 <div id="container">
-    <!-- 背景グリッドと地域配置用SVG -->
+    <!-- マップ背景・地域配置 -->
     <svg id="bg-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
         <g stroke="#1e293b" stroke-width="0.5">
             <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="4" />
@@ -187,33 +185,40 @@
             <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="4" />
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="4" />
         </g>
-        <!-- 各発信元エリアのテキスト表示 -->
-        <text x="200" y="120" fill="#475569" font-size="14" font-weight="bold">アメリカ (北米)</text>
-        <text x="480" y="100" fill="#475569" font-size="14" font-weight="bold">ヨーロッパ</text>
-        <text x="680" y="80" fill="#475569" font-size="14" font-weight="bold">アジア / 中国</text>
-        <text x="220" y="320" fill="#475569" font-size="14" font-weight="bold">南米</text>
-        <text x="800" y="420" fill="#475569" font-size="14" font-weight="bold">オーストラリア</text>
 
-        <!-- ターゲット（日本・東京） -->
-        <text x="830" y="140" fill="#ef4444" font-size="14" font-weight="bold">🇯🇵 日本 (東京・標的拠点)</text>
-        <circle cx="900" cy="170" r="6" fill="#ef4444" />
+        <!-- 海外発信元 -->
+        <text x="200" y="120" fill="#475569" font-size="13" font-weight="bold">アメリカ (北米)</text>
+        <text x="480" y="100" fill="#475569" font-size="13" font-weight="bold">ヨーロッパ</text>
+        <text x="680" y="80" fill="#475569" font-size="13" font-weight="bold">アジア / 中国</text>
+        <text x="220" y="320" fill="#475569" font-size="13" font-weight="bold">南米</text>
+        <text x="800" y="420" fill="#475569" font-size="13" font-weight="bold">オーストラリア</text>
+
+        <!-- 日本国内の複数標的拠点 -->
+        <text x="825" y="125" fill="#ef4444" font-size="12" font-weight="bold">🔴 東京 (関東拠点)</text>
+        <circle cx="890" cy="150" r="5" fill="#ef4444" />
+
+        <text x="825" y="185" fill="#f59e0b" font-size="12" font-weight="bold">🟠 大阪 (関西拠点)</text>
+        <circle cx="870" cy="205" r="4.5" fill="#f59e0b" />
+
+        <text x="825" y="245" fill="#3b82f6" font-size="12" font-weight="bold">🔵 福岡 (九州拠点)</text>
+        <circle cx="840" cy="260" r="4" fill="#3b82f6" />
     </svg>
 
     <canvas id="canvas"></canvas>
 
     <!-- ダッシュボード -->
     <div class="hud-main">
-        <h1>🇯🇵 サイバー攻撃 ライブ監視</h1>
-        <div class="subtitle">日本へ向かう脅威のリアルタイム分析</div>
+        <h1>🇯🇵 日本サイバー防衛指令室</h1>
+        <div class="subtitle">全国拠点への攻撃と迎撃のリアルタイム監視</div>
         
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-label">総迎撃パケット</div>
+                <div class="stat-label">総検知パケット</div>
                 <div id="count-total" class="stat-value">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">警戒状態</div>
-                <div class="stat-value" style="color: #ef4444; font-size: 14px; padding-top: 2px;">警戒態勢</div>
+                <div class="stat-label">迎撃カウンター</div>
+                <div id="count-defense" class="stat-value" style="color: #10b981;">0</div>
             </div>
         </div>
 
@@ -245,36 +250,25 @@
             </div>
         </div>
 
-        <div class="stat-label" style="margin-bottom: 3px;">直近の検知ログ:</div>
-        <div id="log" class="log-display">システム正常稼働中...</div>
+        <div class="stat-label" style="margin-bottom: 3px;">直近の防衛ログ:</div>
+        <div id="log" class="log-display">全国ネットワーク監視中...</div>
     </div>
 
     <!-- 解説パネル -->
     <div class="legend-card">
-        <div class="legend-title">💡 画面の見方（攻撃パケットの種別）</div>
+        <div class="legend-title">💡 画面の見方（攻撃と迎撃の仕組み）</div>
         
         <div class="legend-row">
-            <div class="dot" style="background: #38bdf8; box-shadow: 0 0 6px #38bdf8;"></div>
-            <div class="legend-text">
-                <b>青い光：不正アクセスの下見（スキャン）</b>
-                <span>システムの隙を探してパトロールしている状態</span>
-            </div>
+            <div class="dot" style="background: #ef4444;"></div>
+            <div class="legend-text"><b>赤い光（海外 ➔ 日本各地）：</b> サーバーを狙った危険な集中攻撃。</div>
         </div>
-
         <div class="legend-row">
-            <div class="dot" style="background: #ef4444; box-shadow: 0 0 6px #ef4444;"></div>
-            <div class="legend-text">
-                <b>赤い光：サーバーをパンクさせる攻撃（DDoS）</b>
-                <span>大量データを送りつけダウンさせようとする危険な攻撃</span>
-            </div>
+            <div class="dot" style="background: #38bdf8;"></div>
+            <div class="legend-text"><b>青い光（海外 ➔ 日本各地）：</b> 不正アクセスの下見やセキュリティスキャン。</div>
         </div>
-
         <div class="legend-row">
-            <div class="dot" style="background: #f1f5f9; box-shadow: 0 0 6px #f1f5f9;"></div>
-            <div class="legend-text">
-                <b>白い光：通信の生存確認（Ping）</b>
-                <span>「そこにサーバーはあるか？」と存在を確認する信号</span>
-            </div>
+            <div class="dot" style="background: #10b981;"></div>
+            <div class="legend-text"><b>緑の光（日本各地 ➔ 海外）：</b> 日本側から発信元へ向かう自動迎撃・調査シグナル。</div>
         </div>
     </div>
 </div>
@@ -285,6 +279,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const logEl = document.getElementById('log');
     const countTotalEl = document.getElementById('count-total');
+    const countDefenseEl = document.getElementById('count-defense');
 
     const barScan = document.getElementById('bar-scan');
     const barDdos = document.getElementById('bar-ddos');
@@ -300,10 +295,14 @@ window.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize);
     resize();
 
-    // ターゲット（日本・東京）の位置
-    const targetJapan = { x: 0.90, y: 0.34 };
+    // 日本国内の複数の標的拠点（東京、大阪、福岡）
+    const targets = [
+        { x: 0.89, y: 0.30, name: "東京拠点" },
+        { x: 0.87, y: 0.41, name: "大阪拠点" },
+        { x: 0.84, y: 0.52, name: "福岡拠点" }
+    ];
 
-    // 発信元
+    // 海外の攻撃発信元
     const sources = [
         { x: 0.22, y: 0.26, name: "アメリカ (北米)" },
         { x: 0.52, y: 0.22, name: "ヨーロッパ" },
@@ -314,32 +313,56 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const attackTypes = [
         { id: 'scan', name: "不正アクセスの下見（スキャン）", color: "#38bdf8" },
-        { id: 'ddos', name: "サーバー破壊を狙う集中攻撃（DDoS）", color: "#ef4444" },
-        { id: 'ping', name: "生存確認の通信（Ping）", color: "#f1f5f9" }
+        { id: 'ddos', name: "サーバー破壊攻撃（DDoS）", color: "#ef4444" },
+        { id: 'ping', name: "生存確認通信（Ping）", color: "#f1f5f9" }
     ];
 
     let activePackets = [];
     let totalPacketsCount = 0;
+    let defenseCount = 0;
     let stats = { scan: 0, ddos: 0, ping: 0 };
 
     function spawnPacket() {
         const src = sources[Math.floor(Math.random() * sources.length)];
+        const target = targets[Math.floor(Math.random() * targets.length)];
         const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
         
         stats[attack.id]++;
         totalPacketsCount++;
 
+        // 1. 海外から日本拠点への攻撃パケット
         activePackets.push({
             sx: src.x * canvas.width,
             sy: src.y * canvas.height,
-            tx: targetJapan.x * canvas.width,
-            ty: targetJapan.y * canvas.height,
+            tx: target.x * canvas.width,
+            ty: target.y * canvas.height,
             progress: 0,
-            speed: 0.005 + Math.random() * 0.006,
+            speed: 0.004 + Math.random() * 0.005,
             color: attack.color,
             attackName: attack.name,
-            sourceName: src.name
+            sourceName: src.name,
+            targetName: target.name,
+            isDefense: false
         });
+
+        // 確率で日本側から迎撃シグナル（緑色の光）を押し返す
+        if (Math.random() > 0.4) {
+            defenseCount++;
+            countDefenseEl.innerText = defenseCount.toLocaleString();
+            activePackets.push({
+                sx: target.x * canvas.width,
+                sy: target.y * canvas.height,
+                tx: src.x * canvas.width,
+                ty: src.y * canvas.height,
+                progress: 0,
+                speed: 0.007 + Math.random() * 0.005,
+                color: "#10b981", // 迎撃の緑
+                attackName: "自動迎撃・調査シグナル",
+                sourceName: target.name,
+                targetName: src.name,
+                isDefense: true
+            });
+        }
 
         countTotalEl.innerText = totalPacketsCount.toLocaleString();
 
@@ -355,32 +378,33 @@ window.addEventListener('DOMContentLoaded', () => {
         ratioDdos.innerText = dPct + '%';
         ratioPing.innerText = pPct + '%';
 
-        logEl.innerHTML = `<b>【${src.name}】</b>から検知<br><span style="color:${attack.color}">➔ ${attack.attackName}</span>`;
+        logEl.innerHTML = `<b>【${src.name}】</b> ➔ <b>${target.name}</b><br><span style="color:${attack.color}">➔ ${attack.name}</span>`;
     }
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const tx = targetJapan.x * canvas.width;
-        const ty = targetJapan.y * canvas.height;
-        
-        // 東京の波紋
-        ctx.beginPath();
-        ctx.arc(tx, ty, 15 + (Date.now() / 25) % 30, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        // 各日本拠点の波紋
+        targets.forEach(t => {
+            const tx = t.x * canvas.width;
+            const ty = t.y * canvas.height;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 12 + (Date.now() / 30) % 25, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        });
 
         for (let i = activePackets.length - 1; i >= 0; i--) {
             const p = activePackets[i];
             p.progress += p.speed;
 
             const curX = p.sx + (p.tx - p.sx) * p.progress;
-            const arcHeight = Math.sin(p.progress * Math.PI) * -100;
+            const arcHeight = Math.sin(p.progress * Math.PI) * -90;
             const curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
 
             ctx.beginPath();
-            ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+            ctx.arc(curX, curY, p.isDefense ? 3.5 : 4.5, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
             ctx.shadowBlur = 10;
             ctx.shadowColor = p.color;
@@ -395,7 +419,7 @@ window.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(animate);
     }
 
-    setInterval(spawnPacket, 600);
+    setInterval(spawnPacket, 650);
     animate();
 });
 </script>
