@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JAPAN CYBER DEFENSE OPERATIONS</title>
+    <title>JAPAN CYBER THREAT OPERATIONS</title>
     <style>
         body {
             margin: 0;
@@ -17,7 +17,6 @@
             width: 100vw;
             height: 100vh;
         }
-        /* マップ・グリッド背景 */
         #bg-svg {
             position: absolute;
             top: 0;
@@ -32,8 +31,7 @@
             left: 0;
             display: block;
         }
-
-        /* セキュリティ司令室風ダッシュボード（左上） */
+        /* コントロールパネル（左上） */
         .hud-main {
             position: absolute;
             top: 20px;
@@ -44,7 +42,7 @@
             padding: 16px;
             border-radius: 6px;
             z-index: 10;
-            width: 400px;
+            width: 410px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .header-title {
@@ -55,7 +53,7 @@
         }
         h1 {
             margin: 0;
-            font-size: 14px;
+            font-size: 13px;
             color: #f8fafc;
             letter-spacing: 1px;
         }
@@ -67,10 +65,7 @@
             padding: 2px 6px;
             border-radius: 3px;
             font-weight: bold;
-            animation: blink 1.5s infinite;
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
         .subtitle {
             font-size: 10px;
             color: #94a3b8;
@@ -98,8 +93,6 @@
             font-weight: bold;
             color: #f8fafc;
         }
-
-        /* ハッキングリスク分析メーター */
         .risk-section {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid #1e293b;
@@ -135,7 +128,6 @@
             width: 0%;
             transition: width 0.3s;
         }
-
         .log-box {
             font-size: 10px;
             color: #cbd5e1;
@@ -147,8 +139,7 @@
             overflow: hidden;
             line-height: 1.3;
         }
-
-        /* 画面右下：リアルタイム脅威・防御解説パネル */
+        /* 解説パネル（右下） */
         .explanation-panel {
             position: absolute;
             bottom: 20px;
@@ -184,17 +175,13 @@
             margin-top: 2px;
             flex-shrink: 0;
         }
-        .exp-text b {
-            color: #f8fafc;
-        }
+        .exp-text b { color: #f8fafc; }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <!-- 地図・拠点レイアウト背景 -->
     <svg id="bg-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
-        <!-- グリッド線 -->
         <g stroke="#0f172a" stroke-width="0.5">
             <line x1="0" y1="125" x2="1000" y2="125" stroke-dasharray="3" />
             <line x1="0" y1="250" x2="1000" y2="250" stroke-dasharray="3" />
@@ -203,34 +190,32 @@
             <line x1="500" y1="0" x2="500" y2="500" stroke-dasharray="3" />
             <line x1="750" y1="0" x2="750" y2="500" stroke-dasharray="3" />
         </g>
+        <!-- 国別・地域別の発信元表示 -->
+        <text x="170" y="105" fill="#94a3b8" font-size="11" font-weight="bold">🇺🇸 アメリカ / 踏み台網</text>
+        <text x="450" y="85" fill="#94a3b8" font-size="11" font-weight="bold">🇷🇺 ロシア (サイバー攻撃拠点)</text>
+        <text x="650" y="65" fill="#ef4444" font-size="11" font-weight="bold">🇨🇳 中国 / 🇰🇵 北朝鮮 (主要脅威)</text>
+        <text x="190" y="310" fill="#94a3b8" font-size="11" font-weight="bold">🌎 南米プロキシ</text>
+        <text x="770" y="410" fill="#94a3b8" font-size="11" font-weight="bold">🇦🇺 オーストラリア</text>
 
-        <!-- 世界の発信元エリア -->
-        <text x="180" y="110" fill="#475569" font-size="12" font-weight="bold">🌎 北米 (ボットネット拠点)</text>
-        <text x="460" y="90" fill="#475569" font-size="12" font-weight="bold">🇪🇺 ヨーロッパ (不正アクセス元)</text>
-        <text x="660" y="70" fill="#475569" font-size="12" font-weight="bold">🌏 アジア / 中国 (集中攻撃)</text>
-        <text x="200" y="310" fill="#475569" font-size="12" font-weight="bold">🌎 南米</text>
-        <text x="780" y="410" fill="#475569" font-size="12" font-weight="bold">🇦🇺 オーストラリア</text>
-
-        <!-- 日本の防衛拠点（ターゲット群） -->
+        <!-- 日本の防衛拠点 -->
         <text x="820" y="120" fill="#ef4444" font-size="11" font-weight="bold">🔴 東京 (首都圏・主要IX)</text>
         <circle cx="890" cy="145" r="5" fill="#ef4444" />
 
         <text x="820" y="180" fill="#f59e0b" font-size="11" font-weight="bold">🟠 大阪 (関西データセンター)</text>
         <circle cx="870" cy="200" r="4.5" fill="#f59e0b" />
 
-        <text x="820" y="240" fill="#3b82f6" font-size="11" font-weight="bold">🔵 福岡 (西日本網ゲートウェイ)</text>
+        <text x="820" y="240" fill="#3b82f6" font-size="11" font-weight="bold">🔵 福岡 (西日本ゲートウェイ)</text>
         <circle cx="840" cy="255" r="4" fill="#3b82f6" />
     </svg>
 
     <canvas id="canvas"></canvas>
 
-    <!-- 司令室コントロールパネル -->
     <div class="hud-main">
         <div class="header-title">
-            <h1>JAPAN CYBER DEFENSE</h1>
-            <div class="status-badge">LIVE 脅威警戒中</div>
+            <h1>JAPAN CYBER DEFENSE MONITOR</h1>
+            <div class="status-badge">LIVE 警戒中</div>
         </div>
-        <div class="subtitle">日本のインフラ網に対するハッキング・攻撃のリアルタイム迎撃</div>
+        <div class="subtitle">日本インフラへの国家・組織型ハッキングの迎撃状況</div>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -244,11 +229,11 @@
         </div>
 
         <div class="risk-section">
-            <div class="risk-title">📊 ハッキングリスク・手口分析メーター</div>
+            <div class="risk-title">📊 脅威リスク・手口分析メーター</div>
             
             <div class="bar-container">
                 <div class="bar-header">
-                    <span style="color: #38bdf8;">🔵 不正アクセスの下見・脆弱性スキャン</span>
+                    <span style="color: #38bdf8;">🔵 不正アクセスの下見・スキャン</span>
                     <span id="ratio-scan">0%</span>
                 </div>
                 <div class="bar-track"><div id="bar-scan" class="bar-fill" style="background: #38bdf8;"></div></div>
@@ -275,12 +260,11 @@
         <div id="log" class="log-box">防衛システム稼働中。全回線監視中...</div>
     </div>
 
-    <!-- 右下解説パネル：ハッキングリスクとは何か -->
     <div class="explanation-panel">
-        <div class="exp-title">🛡️ 画面の見方とハッキングリスクの現実</div>
+        <div class="exp-title">🛡️ ハッキングリスクとアニメーションの見方</div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #ef4444;"></div>
-            <div class="exp-text"><b>赤い光（集中攻撃）：</b> サーバーをパンクさせる危険なトラフィック。防壁が自動で検知・遮断します。</div>
+            <div class="exp-text"><b>赤い光（中国・ロシア等の脅威）：</b> サーバーを狙った集中攻撃や破壊工作の波。</div>
         </div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #38bdf8;"></div>
@@ -288,7 +272,7 @@
         </div>
         <div class="exp-row">
             <div class="exp-dot" style="background: #10b981;"></div>
-            <div class="exp-text"><b>緑の光（迎撃・遮断）：</b> 被害を防ぐため、システムが発信元からの通信を即座にブロックした瞬間。</div>
+            <div class="exp-text"><b>緑の光（自動ブロック）：</b> 被害を防ぐため、システムが通信を即座に遮断した瞬間。</div>
         </div>
     </div>
 </div>
@@ -315,21 +299,128 @@ window.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resize);
     resize();
 
-    // 日本国内の主要防衛拠点
     const targets = [
         { x: 0.89, y: 0.29, name: "東京拠点" },
         { x: 0.87, y: 0.40, name: "大阪拠点" },
         { x: 0.84, y: 0.51, name: "福岡拠点" }
     ];
 
-    // 海外からの攻撃元
     const sources = [
-        { x: 0.22, y: 0.25, name: "北米ネットワーク" },
-        { x: 0.52, y: 0.20, name: "欧州サーバー網" },
-        { x: 0.72, y: 0.16, name: "アジアセクター" },
+        { x: 0.68, y: 0.16, name: "中国セクター" },
+        { x: 0.48, y: 0.20, name: "ロシア網" },
+        { x: 0.22, y: 0.25, name: "米国・踏み台網" },
         { x: 0.25, y: 0.58, name: "南米プロキシ" },
         { x: 0.82, y: 0.78, name: "豪州中継点" }
     ];
 
     const attackTypes = [
-        { id
+        { id: 'scan', name: "不正アクセスの下見（スキャン）", color: "#38bdf8" },
+        { id: 'ddos', name: "サーバー破壊攻撃（DDoS）", color: "#ef4444" },
+        { id: 'ping', name: "生存確認の通信（Ping）", color: "#f1f5f9" }
+    ];
+
+    let activePackets = [];
+    let totalPacketsCount = 0;
+    let blockedCount = 0;
+    let stats = { scan: 0, ddos: 0, ping: 0 };
+
+    function spawnPacket() {
+        const src = sources[Math.floor(Math.random() * sources.length)];
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+        
+        stats[attack.id]++;
+        totalPacketsCount++;
+
+        activePackets.push({
+            sx: src.x * canvas.width,
+            sy: src.y * canvas.height,
+            tx: target.x * canvas.width,
+            ty: target.y * canvas.height,
+            progress: 0,
+            speed: 0.004 + Math.random() * 0.005,
+            color: attack.color,
+            attackName: attack.name,
+            sourceName: src.name,
+            targetName: target.name,
+            isBlocked: false
+        });
+
+        if (Math.random() > 0.35) {
+            blockedCount++;
+            countBlockedEl.innerText = blockedCount.toLocaleString();
+            activePackets.push({
+                sx: target.x * canvas.width,
+                sy: target.y * canvas.height,
+                tx: src.x * canvas.width,
+                ty: src.y * canvas.height,
+                progress: 0,
+                speed: 0.008 + Math.random() * 0.005,
+                color: "#10b981",
+                attackName: "ファイアウォール自動遮断",
+                sourceName: target.name,
+                targetName: src.name,
+                isBlocked: true
+            });
+        }
+
+        countTotalEl.innerText = totalPacketsCount.toLocaleString();
+
+        const sPct = Math.round((stats.scan / totalPacketsCount) * 100);
+        const dPct = Math.round((stats.ddos / totalPacketsCount) * 100);
+        const pPct = 100 - (sPct + dPct);
+
+        barScan.style.width = sPct + '%';
+        barDdos.style.width = dPct + '%';
+        barPing.style.width = pPct + '%';
+
+        ratioScan.innerText = sPct + '%';
+        ratioDdos.innerText = dPct + '%';
+        ratioPing.innerText = pPct + '%';
+
+        logEl.innerHTML = `<b>【${src.name}】</b> ➔ <b>${target.name}</b><br><span style="color:${attack.color}">➔ ${attack.name}</span>`;
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        targets.forEach(t => {
+            const tx = t.x * canvas.width;
+            const ty = t.y * canvas.height;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 14 + (Date.now() / 30) % 30, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        });
+
+        for (let i = activePackets.length - 1; i >= 0; i--) {
+            const p = activePackets[i];
+            p.progress += p.speed;
+
+            const curX = p.sx + (p.tx - p.sx) * p.progress;
+            const arcHeight = Math.sin(p.progress * Math.PI) * -95;
+            const curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
+
+            ctx.beginPath();
+            ctx.arc(curX, curY, p.isBlocked ? 3.5 : 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = p.color;
+            ctx.fill();
+
+            if (p.progress >= 1) {
+                activePackets.splice(i, 1);
+            }
+        }
+        ctx.shadowBlur = 0;
+
+        requestAnimationFrame(animate);
+    }
+
+    setInterval(spawnPacket, 600);
+    animate();
+});
+</script>
+</body>
+</html>
