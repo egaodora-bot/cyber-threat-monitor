@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JAPAN CYBER THREAT OPERATIONS</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
+            padding: 0;
             background-color: #050b14;
             color: #e2e8f0;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, sans-serif;
             overflow: hidden;
         }
         #container {
@@ -41,7 +45,7 @@
             padding: 16px;
             border-radius: 6px;
             z-index: 10;
-            width: 410px;
+            width: 380px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .header-title {
@@ -147,7 +151,7 @@
             padding: 14px;
             border-radius: 6px;
             z-index: 10;
-            width: 360px;
+            width: 350px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .exp-title {
@@ -253,7 +257,7 @@
         </div>
 
         <div class="stat-label" style="margin-bottom: 2px;">リアルタイム防衛・遮断ログ:</div>
-        <div id="log" class="log-box">防衛システム稼働中。監視を開始します...</div>
+        <div id="log" class="log-box">防衛システム稼働中...</div>
     </div>
 
     <div class="explanation-panel">
@@ -274,19 +278,19 @@
 </div>
 
 <script>
-    // 即時実行で確実に動作させる
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const logEl = document.getElementById('log');
-    const countTotalEl = document.getElementById('count-total');
-    const countBlockedEl = document.getElementById('count-blocked');
+(function() {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var logEl = document.getElementById('log');
+    var countTotalEl = document.getElementById('count-total');
+    var countBlockedEl = document.getElementById('count-blocked');
 
-    const barScan = document.getElementById('bar-scan');
-    const barDdos = document.getElementById('bar-ddos');
-    const barPing = document.getElementById('bar-ping');
-    const ratioScan = document.getElementById('ratio-scan');
-    const ratioDdos = document.getElementById('ratio-ddos');
-    const ratioPing = document.getElementById('ratio-ping');
+    var barScan = document.getElementById('bar-scan');
+    var barDdos = document.getElementById('bar-ddos');
+    var barPing = document.getElementById('bar-ping');
+    var ratioScan = document.getElementById('ratio-scan');
+    var ratioDdos = document.getElementById('ratio-ddos');
+    var ratioPing = document.getElementById('ratio-ping');
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -295,16 +299,130 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const targets = [
+    var targets = [
         { x: 0.89, y: 0.29, name: "東京拠点" },
         { x: 0.87, y: 0.40, name: "大阪拠点" },
         { x: 0.84, y: 0.51, name: "福岡拠点" }
     ];
 
-    const sources = [
+    var sources = [
         { x: 0.68, y: 0.16, name: "中国セクター" },
         { x: 0.48, y: 0.20, name: "ロシア網" },
         { x: 0.22, y: 0.25, name: "米国・踏み台網" },
         { x: 0.25, y: 0.58, name: "南米プロキシ" },
         { x: 0.82, y: 0.78, name: "豪州中継点" }
     ];
+
+    var attackTypes = [
+        { id: 'scan', name: "不正アクセスの下見（スキャン）", color: "#38bdf8" },
+        { id: 'ddos', name: "サーバー破壊攻撃（DDoS）", color: "#ef4444" },
+        { id: 'ping', name: "生存確認の通信（Ping）", color: "#f1f5f9" }
+    ];
+
+    var activePackets = [];
+    var totalPacketsCount = 0;
+    var blockedCount = 0;
+    var stats = { scan: 0, ddos: 0, ping: 0 };
+
+    function spawnPacket() {
+        var src = sources[Math.floor(Math.random() * sources.length)];
+        var target = targets[Math.floor(Math.random() * targets.length)];
+        var attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+        
+        stats[attack.id]++;
+        totalPacketsCount++;
+
+        activePackets.push({
+            sx: src.x * canvas.width,
+            sy: src.y * canvas.height,
+            tx: target.x * canvas.width,
+            ty: target.y * canvas.height,
+            progress: 0,
+            speed: 0.005 + Math.random() * 0.005,
+            color: attack.color,
+            attackName: attack.name,
+            sourceName: src.name,
+            targetName: target.name,
+            isBlocked: false
+        });
+
+        if (Math.random() > 0.35) {
+            blockedCount++;
+            countBlockedEl.innerText = blockedCount.toLocaleString();
+            activePackets.push({
+                sx: target.x * canvas.width,
+                sy: target.y * canvas.height,
+                tx: src.x * canvas.width,
+                ty: src.y * canvas.height,
+                progress: 0,
+                speed: 0.008 + Math.random() * 0.005,
+                color: "#10b981",
+                attackName: "ファイアウォール自動遮断",
+                sourceName: target.name,
+                targetName: src.name,
+                isBlocked: true
+            });
+        }
+
+        countTotalEl.innerText = totalPacketsCount.toLocaleString();
+
+        var sPct = Math.round((stats.scan / totalPacketsCount) * 100);
+        var dPct = Math.round((stats.ddos / totalPacketsCount) * 100);
+        var pPct = 100 - (sPct + dPct);
+
+        barScan.style.width = sPct + '%';
+        barDdos.style.width = dPct + '%';
+        barPing.style.width = pPct + '%';
+
+        ratioScan.innerText = sPct + '%';
+        ratioDdos.innerText = dPct + '%';
+        ratioPing.innerText = pPct + '%';
+
+        logEl.innerHTML = '<b>【' + src.name + '】</b> ➔ <b>' + target.name + '</b><br><span style="color:' + attack.color + '">➔ ' + attack.name + '</span>';
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (var t = 0; t < targets.length; t++) {
+            var tx = targets[t].x * canvas.width;
+            var ty = targets[t].y * canvas.height;
+            ctx.beginPath();
+            ctx.arc(tx, ty, 14 + (Date.now() / 30) % 30, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        for (var i = activePackets.length - 1; i >= 0; i--) {
+            var p = activePackets[i];
+            p.progress += p.speed;
+
+            var curX = p.sx + (p.tx - p.sx) * p.progress;
+            var arcHeight = Math.sin(p.progress * Math.PI) * -95;
+            var curY = p.sy + (p.ty - p.sy) * p.progress + arcHeight;
+
+            ctx.beginPath();
+            ctx.arc(curX, curY, p.isBlocked ? 3.5 : 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = p.color;
+            ctx.fill();
+
+            if (p.progress >= 1) {
+                activePackets.splice(i, 1);
+            }
+        }
+        ctx.shadowBlur = 0;
+
+        requestAnimationFrame(animate);
+    }
+
+    // 最初に数回即時実行して確実に画面を動かす
+    spawnPacket();
+    setInterval(spawnPacket, 600);
+    animate();
+})();
+</script>
+</body>
+</html>
